@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface Channel {
   id: string;
@@ -18,6 +19,7 @@ export function ChannelSelector({
   currentChannelId,
   currentChannelName,
 }: ChannelSelectorProps) {
+  const router = useRouter();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -57,6 +59,7 @@ export function ChannelSelector({
       });
       setSelected(channel);
       setOpen(false);
+      router.refresh();
     } catch {
       // ignore
     } finally {
