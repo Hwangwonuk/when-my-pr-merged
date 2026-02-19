@@ -35,6 +35,6 @@ export const config = {
      * - /login, /api/auth, /api/webhooks, /api/cron, /api/og, /api/slack
      * - _next (static files), favicon, public assets
      */
-    "/((?!login|api/auth|api/webhooks|api/cron|api/og|api/slack|share|_next|favicon|.*\\.).*)",
+    "/((?!login|api/auth|api/webhooks|api/cron|api/og|api/slack|api/debug|share|_next|favicon|.*\\.).*)",
   ],
 };
