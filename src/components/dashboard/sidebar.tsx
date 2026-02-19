@@ -47,30 +47,36 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => {
-          const fullHref = `/${orgSlug}${item.href}`;
-          const isActive =
-            item.href === ""
-              ? pathname === `/${orgSlug}`
-              : pathname.startsWith(fullHref);
+        {orgSlug ? (
+          navItems.map((item) => {
+            const fullHref = `/${orgSlug}${item.href}`;
+            const isActive =
+              item.href === ""
+                ? pathname === `/${orgSlug}`
+                : pathname.startsWith(fullHref);
 
-          return (
-            <Link
-              key={item.href}
-              href={fullHref}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                isActive
-                  ? "bg-indigo-600/20 text-indigo-400"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800"
-              )}
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={item.href}
+                href={fullHref}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                  isActive
+                    ? "bg-indigo-600/20 text-indigo-400"
+                    : "text-gray-400 hover:text-white hover:bg-gray-800"
+                )}
+              >
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })
+        ) : (
+          <p className="px-3 py-2 text-sm text-gray-500">
+            조직을 선택하면 메뉴가 표시됩니다.
+          </p>
+        )}
       </nav>
 
       {/* Footer */}
