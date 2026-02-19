@@ -11,6 +11,11 @@ interface InstallationPayload {
       avatar_url: string;
     };
   };
+  sender: {
+    id: number;
+    login: string;
+    avatar_url: string;
+  };
   repositories?: Array<{
     id: number;
     name: string;
@@ -61,6 +66,37 @@ export async function handleInstallationEvent(payload: InstallationPayload) {
             })
           )
         );
+      }
+
+      // Create member record for the user who installed the app
+      if (payload.sender) {
+        const user = await prisma.user.upsert({
+          where: { githubId: payload.sender.id },
+          update: {
+            login: payload.sender.login,
+            avatarUrl: payload.sender.avatar_url,
+          },
+          create: {
+            githubId: payload.sender.id,
+            login: payload.sender.login,
+            avatarUrl: payload.sender.avatar_url,
+          },
+        });
+
+        await prisma.member.upsert({
+          where: {
+            userId_installationId: {
+              userId: user.id,
+              installationId: installation.id,
+            },
+          },
+          update: {},
+          create: {
+            userId: user.id,
+            installationId: installation.id,
+            role: "admin",
+          },
+        });
       }
 
       // Trigger historical data sync (fire and forget)

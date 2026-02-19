@@ -7,7 +7,7 @@ export default async function DashboardRootPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const memberships = await prisma.member.findMany({
+  let memberships = await prisma.member.findMany({
     where: { userId: user.userId },
     include: {
       installation: {
@@ -17,6 +17,43 @@ export default async function DashboardRootPage() {
       },
     },
   });
+
+  // member 레코드가 없지만 동일 login의 installation이 있으면 자동 생성
+  if (memberships.length === 0) {
+    const matchingInstallations = await prisma.installation.findMany({
+      where: { accountLogin: user.login },
+    });
+
+    for (const inst of matchingInstallations) {
+      await prisma.member.upsert({
+        where: {
+          userId_installationId: {
+            userId: user.userId,
+            installationId: inst.id,
+          },
+        },
+        update: {},
+        create: {
+          userId: user.userId,
+          installationId: inst.id,
+          role: "admin",
+        },
+      });
+    }
+
+    if (matchingInstallations.length > 0) {
+      memberships = await prisma.member.findMany({
+        where: { userId: user.userId },
+        include: {
+          installation: {
+            include: {
+              _count: { select: { repositories: true } },
+            },
+          },
+        },
+      });
+    }
+  }
 
   // 소속 org가 하나면 자동 리다이렉트
   if (memberships.length === 1) {
