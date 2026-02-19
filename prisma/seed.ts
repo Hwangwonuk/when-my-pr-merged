@@ -1,6 +1,11 @@
+import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new (PrismaClient as unknown as new () => InstanceType<typeof PrismaClient>)();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new (PrismaClient as unknown as new (opts: { adapter: PrismaPg }) => InstanceType<typeof PrismaClient>)({
+  adapter,
+});
 
 const badges = [
   {
