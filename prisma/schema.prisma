@@ -1,0 +1,244 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── GitHub App Installation ────────────────────────────────────────
+
+model Installation {
+  id               String    @id @default(cuid())
+  githubInstallId  Int       @unique @map("github_install_id")
+  accountLogin     String    @map("account_login")
+  accountType      String    @map("account_type") // "Organization" | "User"
+  accountAvatarUrl String?   @map("account_avatar_url")
+  accessToken      String?   @map("access_token")
+  tokenExpiresAt   DateTime? @map("token_expires_at")
+  suspended        Boolean   @default(false)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  repositories     Repository[]
+  slackIntegration SlackIntegration?
+  members          Member[]
+
+  @@map("installations")
+}
+
+// ─── Repository ─────────────────────────────────────────────────────
+
+model Repository {
+  id             String   @id @default(cuid())
+  githubId       Int      @unique @map("github_id")
+  name           String
+  fullName       String   @map("full_name")
+  private        Boolean  @default(false)
+  defaultBranch  String   @default("main") @map("default_branch")
+  installationId String   @map("installation_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  installation Installation  @relation(fields: [installationId], references: [id], onDelete: Cascade)
+  pullRequests PullRequest[]
+
+  @@map("repositories")
+}
+
+// ─── User (GitHub user) ─────────────────────────────────────────────
+
+model User {
+  id          String   @id @default(cuid())
+  githubId    Int      @unique @map("github_id")
+  login       String   @unique
+  name        String?
+  avatarUrl   String?  @map("avatar_url")
+  email       String?
+  slackUserId String?  @map("slack_user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  authoredPRs    PullRequest[]   @relation("PRAuthor")
+  reviews        Review[]
+  reviewRequests ReviewRequest[]
+  memberships    Member[]
+  badges         UserBadge[]
+
+  @@map("users")
+}
+
+// ─── Member (user <-> installation/org mapping) ─────────────────────
+
+model Member {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  installationId String   @map("installation_id")
+  role           String   @default("member")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  installation Installation @relation(fields: [installationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, installationId])
+  @@map("members")
+}
+
+// ─── Pull Request ───────────────────────────────────────────────────
+
+model PullRequest {
+  id           String  @id @default(cuid())
+  githubId     Int     @unique @map("github_id")
+  number       Int
+  title        String
+  state        String // "open" | "closed" | "merged"
+  draft        Boolean @default(false)
+  additions    Int     @default(0)
+  deletions    Int     @default(0)
+  changedFiles Int     @default(0) @map("changed_files")
+  authorId     String  @map("author_id")
+  repositoryId String  @map("repository_id")
+
+  // Key timestamps for analytics
+  createdAt      DateTime  @map("created_at")
+  firstReviewAt  DateTime? @map("first_review_at")
+  firstApprovalAt DateTime? @map("first_approval_at")
+  mergedAt       DateTime? @map("merged_at")
+  closedAt       DateTime? @map("closed_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  // Precomputed metrics
+  timeToFirstReviewMs BigInt? @map("time_to_first_review_ms")
+  timeToMergeMs       BigInt? @map("time_to_merge_ms")
+  revisionCount       Int     @default(0) @map("revision_count")
+  commentCount        Int     @default(0) @map("comment_count")
+  reviewCycleCount    Int     @default(0) @map("review_cycle_count")
+
+  // Conflict tracking
+  hasConflict         Boolean   @default(false) @map("has_conflict")
+  conflictDetectedAt  DateTime? @map("conflict_detected_at")
+  conflictResolvedAt  DateTime? @map("conflict_resolved_at")
+
+  author     User         @relation("PRAuthor", fields: [authorId], references: [id])
+  repository Repository   @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  reviews    Review[]
+  reviewRequests ReviewRequest[]
+
+  @@index([repositoryId, createdAt])
+  @@index([authorId, createdAt])
+  @@index([state, createdAt])
+  @@index([mergedAt])
+  @@map("pull_requests")
+}
+
+// ─── Review ─────────────────────────────────────────────────────────
+
+model Review {
+  id            String   @id @default(cuid())
+  githubId      Int      @unique @map("github_id")
+  pullRequestId String   @map("pull_request_id")
+  reviewerId    String   @map("reviewer_id")
+  state         String // "APPROVED" | "CHANGES_REQUESTED" | "COMMENTED" | "DISMISSED"
+  submittedAt   DateTime @map("submitted_at")
+  responseTimeMs BigInt? @map("response_time_ms")
+
+  pullRequest PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  reviewer    User        @relation(fields: [reviewerId], references: [id])
+
+  @@index([pullRequestId, submittedAt])
+  @@index([reviewerId, submittedAt])
+  @@map("reviews")
+}
+
+// ─── Review Request ─────────────────────────────────────────────────
+
+model ReviewRequest {
+  id            String    @id @default(cuid())
+  pullRequestId String    @map("pull_request_id")
+  reviewerId    String    @map("reviewer_id")
+  requestedAt   DateTime  @map("requested_at")
+  fulfilledAt   DateTime? @map("fulfilled_at")
+
+  pullRequest PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  reviewer    User        @relation(fields: [reviewerId], references: [id])
+
+  @@index([pullRequestId])
+  @@index([reviewerId, requestedAt])
+  @@map("review_requests")
+}
+
+// ─── Slack Integration ──────────────────────────────────────────────
+
+model SlackIntegration {
+  id             String  @id @default(cuid())
+  installationId String  @unique @map("installation_id")
+  teamId         String  @map("team_id")
+  teamName       String  @map("team_name")
+  botToken       String  @map("bot_token")
+  channelId      String? @map("channel_id")
+  channelName    String? @map("channel_name")
+  webhookUrl     String? @map("webhook_url")
+
+  // Notification preferences
+  stalePrAlertEnabled   Boolean @default(true) @map("stale_pr_alert_enabled")
+  stalePrThresholdHours Int     @default(24) @map("stale_pr_threshold_hours")
+  hotStreakAlertEnabled  Boolean @default(true) @map("hot_streak_alert_enabled")
+  weeklyReportEnabled   Boolean @default(true) @map("weekly_report_enabled")
+  autoPraiseEnabled     Boolean @default(true) @map("auto_praise_enabled")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  installation Installation @relation(fields: [installationId], references: [id], onDelete: Cascade)
+
+  @@map("slack_integrations")
+}
+
+// ─── Badge / Achievement ────────────────────────────────────────────
+
+model Badge {
+  id          String @id @default(cuid())
+  slug        String @unique
+  name        String
+  description String
+  iconUrl     String @map("icon_url")
+  tier        String @default("bronze") // "bronze" | "silver" | "gold" | "diamond"
+  criteria    Json
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  badgeId   String   @map("badge_id")
+  awardedAt DateTime @default(now()) @map("awarded_at")
+  period    String? // "2025-W12", "2025-03"
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId, period])
+  @@map("user_badges")
+}
+
+// ─── Webhook Event Log ──────────────────────────────────────────────
+
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  source      String // "github" | "slack"
+  eventType   String    @map("event_type")
+  action      String?
+  payload     Json
+  processed   Boolean   @default(false)
+  error       String?
+  receivedAt  DateTime  @default(now()) @map("received_at")
+  processedAt DateTime? @map("processed_at")
+
+  @@index([source, eventType, receivedAt])
+  @@index([processed])
+  @@map("webhook_events")
+}
