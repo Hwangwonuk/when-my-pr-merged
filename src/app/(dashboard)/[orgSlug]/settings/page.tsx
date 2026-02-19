@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ChannelSelector } from "@/components/dashboard/channel-selector";
 
 interface Props {
   params: Promise<{ orgSlug: string }>;
@@ -104,12 +105,11 @@ export default async function SettingsPage({ params }: Props) {
                   <p className="text-sm text-gray-400 mb-1">워크스페이스</p>
                   <p className="text-white">{slack.teamName}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-400 mb-1">알림 채널</p>
-                  <p className="text-white">
-                    {slack.channelName ? `#${slack.channelName}` : "미설정"}
-                  </p>
-                </div>
+                <ChannelSelector
+                  installationId={installation.id}
+                  currentChannelId={slack.channelId}
+                  currentChannelName={slack.channelName}
+                />
               </div>
             </div>
           ) : (
