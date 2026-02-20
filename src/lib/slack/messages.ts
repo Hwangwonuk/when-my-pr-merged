@@ -138,6 +138,25 @@ export const slackMessages = {
     ],
   }),
 
+  testMessage: (channelName: string) => ({
+    blocks: [
+      {
+        type: "section" as const,
+        text: {
+          type: "mrkdwn" as const,
+          text: `:white_check_mark: *When My PR Merged* 연동이 완료되었습니다!\n#${channelName} 채널로 알림이 전송됩니다.`,
+        },
+      },
+      {
+        type: "section" as const,
+        text: {
+          type: "mrkdwn" as const,
+          text: "이 채널에서 받을 수 있는 알림:\n• :eyes: 방치 PR 알림\n• :zap: 빠른 리뷰 칭찬\n• :fire: Hot Streak 알림\n• :bar_chart: 일간 다이제스트 / 주간 리포트",
+        },
+      },
+    ],
+  }),
+
   prSizeGuide: (linesChanged: number) => {
     if (linesChanged <= 100) {
       return `:white_check_mark: 이 PR은 리뷰하기 좋은 크기입니다 (${linesChanged}줄)`;

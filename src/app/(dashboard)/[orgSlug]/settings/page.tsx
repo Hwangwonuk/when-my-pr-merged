@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Settings } from "lucide-react";
 import { ChannelSelector } from "@/components/dashboard/channel-selector";
 import { NotificationToggle } from "@/components/dashboard/notification-toggle";
+import { TestMessageButton } from "@/components/dashboard/test-message-button";
 
 interface Props {
   params: Promise<{ orgSlug: string }>;
@@ -120,6 +121,9 @@ export default async function SettingsPage({ params }: Props) {
                   currentChannelName={slack.channelName}
                 />
               </div>
+              {slack.channelId && (
+                <TestMessageButton installationId={installation.id} />
+              )}
             </div>
           ) : (
             <div>
