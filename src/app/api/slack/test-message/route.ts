@@ -33,7 +33,8 @@ export async function POST(req: NextRequest) {
     const client = getSlackClient(slack.botToken);
     const message = slackMessages.testMessage(slack.channelName);
 
-    await client.conversations.join({ channel: slack.channelId });
+    // Try to join the channel (may fail if channels:join scope is missing, which is ok if bot is already a member)
+    await client.conversations.join({ channel: slack.channelId }).catch(() => {});
 
     const result = await client.chat.postMessage({
       channel: slack.channelId,
