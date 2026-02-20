@@ -113,7 +113,7 @@ export async function handlePullRequestEvent(payload: PullRequestPayload) {
           payload.repository.full_name,
           pr.number,
           pr.additions + pr.deletions
-        ).catch(() => {/* 실패해도 무시 */});
+        ).catch((err) => console.error("[SizeGuide] Failed to post comment:", err));
 
         // Slack 머지 예측 알림 (fire-and-forget)
         sendPredictionToSlack(
@@ -121,7 +121,7 @@ export async function handlePullRequestEvent(payload: PullRequestPayload) {
           pr.id,
           pr.title,
           pr.number
-        ).catch(() => {/* 실패해도 무시 */});
+        ).catch((err) => console.error("[Prediction] Failed to send Slack prediction:", err));
       }
       break;
     }
@@ -305,6 +305,6 @@ async function sendPredictionToSlack(
 
   await sendMergePrediction(
     { botToken: slack.botToken, channelId: slack.channelId },
-    { title: prTitle, number: prNumber, predictedTime }
+    { title: prTitle, number: prNumber, predictedTime, confidenceLevel: prediction.confidenceLevel }
   );
 }

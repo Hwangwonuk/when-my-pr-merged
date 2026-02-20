@@ -22,6 +22,7 @@ interface MergePredictionParams {
   title: string;
   number: number;
   predictedTime: string;
+  confidenceLevel?: "high" | "medium" | "low";
 }
 
 interface WeeklyReportParams {
@@ -82,17 +83,32 @@ export const slackMessages = {
     ],
   }),
 
-  mergePrediction: (params: MergePredictionParams) => ({
-    blocks: [
-      {
-        type: "section" as const,
-        text: {
-          type: "mrkdwn" as const,
-          text: `:crystal_ball: PR #${params.number} "${params.title}" 머지 예상: *${params.predictedTime}*`,
+  mergePrediction: (params: MergePredictionParams) => {
+    const confidenceIcons: Record<string, string> = {
+      high: ":large_green_circle:",
+      medium: ":large_yellow_circle:",
+      low: ":red_circle:",
+    };
+    const confidenceLabels: Record<string, string> = {
+      high: "높음",
+      medium: "보통",
+      low: "낮음",
+    };
+    const level = params.confidenceLevel ?? "medium";
+    const confidenceText = ` ${confidenceIcons[level]} 신뢰도: ${confidenceLabels[level]}`;
+
+    return {
+      blocks: [
+        {
+          type: "section" as const,
+          text: {
+            type: "mrkdwn" as const,
+            text: `:crystal_ball: PR #${params.number} "${params.title}" 머지 예상: *${params.predictedTime}*${confidenceText}`,
+          },
         },
-      },
-    ],
-  }),
+      ],
+    };
+  },
 
   weeklyReport: (params: WeeklyReportParams) => ({
     blocks: [

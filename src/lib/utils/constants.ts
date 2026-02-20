@@ -17,4 +17,6 @@ export const BADGE_SLUGS = {
   STREAK_MASTER: "streak-master",
   MOST_HELPFUL: "most-helpful",
   FASTEST_APPROVER: "fastest-approver",
+  SMALL_PR_CHAMPION: "small-pr-champion",
+  CONSISTENCY_STAR: "consistency-star",
 } as const;

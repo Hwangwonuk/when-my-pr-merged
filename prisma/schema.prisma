@@ -18,6 +18,8 @@ model Installation {
   accessToken      String?   @map("access_token")
   tokenExpiresAt   DateTime? @map("token_expires_at")
   suspended        Boolean   @default(false)
+  syncStatus       String    @default("pending") @map("sync_status") // "pending" | "syncing" | "completed" | "failed"
+  syncedAt         DateTime? @map("synced_at")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 
@@ -186,6 +188,7 @@ model SlackIntegration {
   hotStreakAlertEnabled  Boolean @default(true) @map("hot_streak_alert_enabled")
   weeklyReportEnabled   Boolean @default(true) @map("weekly_report_enabled")
   autoPraiseEnabled     Boolean @default(true) @map("auto_praise_enabled")
+  dailyDigestEnabled    Boolean @default(true) @map("daily_digest_enabled")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

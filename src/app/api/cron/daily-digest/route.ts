@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const yesterday = subDays(now, 1);
 
   const integrations = await prisma.slackIntegration.findMany({
-    where: { channelId: { not: null } },
+    where: { channelId: { not: null }, dailyDigestEnabled: true },
     include: { installation: true },
   });
 

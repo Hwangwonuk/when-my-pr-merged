@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ChannelSelector } from "@/components/dashboard/channel-selector";
+import { NotificationToggle } from "@/components/dashboard/notification-toggle";
 
 interface Props {
   params: Promise<{ orgSlug: string }>;
@@ -71,6 +72,13 @@ export default async function SettingsPage({ params }: Props) {
                 {installation._count.members}명
               </p>
             </div>
+            <div>
+              <p className="text-sm text-gray-400 mb-1">데이터 동기화</p>
+              <SyncStatusBadge
+                status={installation.syncStatus}
+                syncedAt={installation.syncedAt}
+              />
+            </div>
           </div>
 
           {installation.repositories.length > 0 && (
@@ -137,22 +145,37 @@ export default async function SettingsPage({ params }: Props) {
             </p>
           ) : (
             <div className="space-y-4">
-              <NotificationRow
+              <NotificationToggle
+                installationId={installation.id}
+                field="stalePrAlertEnabled"
                 label="방치 PR 알림"
                 description={`리뷰 없이 ${slack.stalePrThresholdHours}시간이 지나면 알림`}
                 enabled={slack.stalePrAlertEnabled}
               />
-              <NotificationRow
+              <NotificationToggle
+                installationId={installation.id}
+                field="autoPraiseEnabled"
                 label="빠른 리뷰 자동 칭찬"
                 description="30분 내 리뷰 완료 시 감사 메시지 전송"
                 enabled={slack.autoPraiseEnabled}
               />
-              <NotificationRow
+              <NotificationToggle
+                installationId={installation.id}
+                field="hotStreakAlertEnabled"
                 label="Hot Streak 알림"
                 description="연속 3개 PR이 1시간 내 머지 시 알림"
                 enabled={slack.hotStreakAlertEnabled}
               />
-              <NotificationRow
+              <NotificationToggle
+                installationId={installation.id}
+                field="dailyDigestEnabled"
+                label="일간 다이제스트"
+                description="매일 전날의 PR 활동 요약 Slack 전송"
+                enabled={slack.dailyDigestEnabled}
+              />
+              <NotificationToggle
+                installationId={installation.id}
+                field="weeklyReportEnabled"
                 label="주간 리포트"
                 description="매주 월요일 PR 통계 요약 Slack 전송"
                 enabled={slack.weeklyReportEnabled}
@@ -192,30 +215,32 @@ export default async function SettingsPage({ params }: Props) {
   );
 }
 
-function NotificationRow({
-  label,
-  description,
-  enabled,
+
+function SyncStatusBadge({
+  status,
+  syncedAt,
 }: {
-  label: string;
-  description: string;
-  enabled: boolean;
+  status: string;
+  syncedAt: Date | null;
 }) {
+  const config: Record<string, { label: string; className: string }> = {
+    pending: { label: "대기 중", className: "bg-gray-700/30 text-gray-400" },
+    syncing: { label: "동기화 중...", className: "bg-yellow-900/30 text-yellow-400" },
+    completed: { label: "완료", className: "bg-green-900/30 text-green-400" },
+    failed: { label: "실패", className: "bg-red-900/30 text-red-400" },
+  };
+  const { label, className } = config[status] ?? config.pending;
+
   return (
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm font-medium text-white">{label}</p>
-        <p className="text-xs text-gray-400">{description}</p>
-      </div>
-      <span
-        className={`text-xs px-2 py-1 rounded-full ${
-          enabled
-            ? "bg-green-900/30 text-green-400"
-            : "bg-gray-700/30 text-gray-500"
-        }`}
-      >
-        {enabled ? "활성" : "비활성"}
+    <div>
+      <span className={`text-xs px-2 py-1 rounded-full ${className}`}>
+        {label}
       </span>
+      {syncedAt && (
+        <p className="text-xs text-gray-500 mt-1">
+          {syncedAt.toLocaleDateString("ko-KR")}
+        </p>
+      )}
     </div>
   );
 }

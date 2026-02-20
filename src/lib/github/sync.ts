@@ -20,16 +20,33 @@ export async function syncHistoricalData(
   installationGithubId: number,
   installationId: string
 ) {
-  const octokit = await getInstallationOctokit(installationGithubId);
-  const since = subDays(new Date(), HISTORY_SYNC_DAYS).toISOString();
-
-  // Get all repos for this installation
-  const repos = await prisma.repository.findMany({
-    where: { installationId },
+  await prisma.installation.update({
+    where: { id: installationId },
+    data: { syncStatus: "syncing" },
   });
 
-  for (const repo of repos) {
-    await syncRepoHistory(octokit, repo.id, repo.fullName, since);
+  try {
+    const octokit = await getInstallationOctokit(installationGithubId);
+    const since = subDays(new Date(), HISTORY_SYNC_DAYS).toISOString();
+
+    const repos = await prisma.repository.findMany({
+      where: { installationId },
+    });
+
+    for (const repo of repos) {
+      await syncRepoHistory(octokit, repo.id, repo.fullName, since);
+    }
+
+    await prisma.installation.update({
+      where: { id: installationId },
+      data: { syncStatus: "completed", syncedAt: new Date() },
+    });
+  } catch (err) {
+    console.error("[Sync] Historical sync failed:", err);
+    await prisma.installation.update({
+      where: { id: installationId },
+      data: { syncStatus: "failed" },
+    });
   }
 }
 
@@ -175,8 +192,8 @@ async function processPulls(
           },
         });
       }
-    } catch {
-      // Reviews fetch might fail for some PRs, continue
+    } catch (err) {
+      console.error(`[Sync] Failed to fetch reviews for PR #${pr.number}:`, err);
     }
   }
 }

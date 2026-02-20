@@ -55,7 +55,7 @@ export async function sendStalePrAlert(
 
 export async function sendMergePrediction(
   config: SlackConfig,
-  pr: { title: string; number: number; predictedTime: string }
+  pr: { title: string; number: number; predictedTime: string; confidenceLevel?: "high" | "medium" | "low" }
 ) {
   if (!config.channelId) return;
 
