@@ -33,14 +33,21 @@ export async function POST(req: NextRequest) {
     const client = getSlackClient(slack.botToken);
     const message = slackMessages.testMessage(slack.channelName);
 
-    await client.chat.postMessage({
+    const result = await client.chat.postMessage({
       channel: slack.channelId,
       blocks: message.blocks,
       text: "When My PR Merged 연동 테스트 메시지",
     });
 
+    if (!result.ok) {
+      console.error("[test-message] Slack API error:", result.error);
+      return NextResponse.json({ error: result.error ?? "Slack API error" }, { status: 500 });
+    }
+
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("[test-message] Failed to send:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
