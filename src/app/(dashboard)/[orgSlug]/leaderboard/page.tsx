@@ -22,7 +22,7 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
   if (!installation) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">팀 리더보드</h1>
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">팀 리더보드</h1>
         <EmptyState
           icon={<Trophy className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
@@ -98,8 +98,8 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">팀 리더보드</h1>
-        <div className="flex gap-1 rounded-lg bg-gray-800/50 border border-gray-700/50 p-1">
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider">팀 리더보드</h1>
+        <div className="flex gap-0.5">
           {[
             { value: "7d", label: "7일" },
             { value: "30d", label: "30일" },
@@ -108,10 +108,10 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
             <a
               key={p.value}
               href={`/${orgSlug}/leaderboard?period=${p.value}`}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-xs rounded-md transition-colors duration-200 ${
                 period === p.value
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+                  ? "bg-white/10 text-white"
+                  : "text-gray-500 hover:text-white hover:bg-white/5"
               }`}
             >
               {p.label}
@@ -127,31 +127,31 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
           description="이 기간에 리뷰 활동이 없습니다. 기간을 변경하거나 데이터가 쌓이기를 기다려주세요."
         />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* 리뷰어 리더보드 */}
           {rankings.length > 0 && (
-            <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-              <h2 className="text-lg font-semibold mb-4">리뷰어 리더보드</h2>
-              <div className="space-y-3">
+            <div>
+              <h2 className="text-sm font-medium text-gray-300 mb-3">리뷰어 리더보드</h2>
+              <div className="space-y-0">
                 {rankings.slice(0, 10).map((reviewer) => {
                   const userBadgeList = badgesByUser.get(reviewer.user.id) ?? [];
 
                   return (
                     <div
                       key={reviewer.user.id}
-                      className="flex items-center gap-4 rounded-lg bg-gray-700/20 px-4 py-3"
+                      className="flex items-center gap-4 px-3 py-2.5 -mx-3 rounded-md hover:bg-gray-800/40 hover:-translate-y-px transition-all duration-200"
                     >
                       <RankBadge rank={reviewer.rank} size="md" />
                       {reviewer.user.avatarUrl && (
                         <img
                           src={reviewer.user.avatarUrl}
                           alt={reviewer.user.login}
-                          className="w-8 h-8 rounded-full"
+                          className="w-6 h-6 rounded-full"
                         />
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-white truncate">
+                          <span className="text-[13px] font-medium text-white truncate">
                             {reviewer.user.login}
                           </span>
                           {userBadgeList.map((b, i) => (
@@ -160,18 +160,18 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
                             </span>
                           ))}
                         </div>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-600">
                           리뷰 {reviewer.reviewCount}건 · 승인율{" "}
                           {reviewer.approvalRate.toFixed(0)}%
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-white">
+                        <p className="text-[13px] tabular-nums text-white">
                           {reviewer.avgResponseTimeMs > 0
                             ? formatDuration(reviewer.avgResponseTimeMs)
                             : "N/A"}
                         </p>
-                        <p className="text-xs text-gray-500">평균 응답</p>
+                        <p className="text-xs text-gray-600">평균 응답</p>
                       </div>
                     </div>
                   );
@@ -182,9 +182,9 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
 
           {/* PR 머지 리더보드 */}
           {authorStats.length > 0 && (
-            <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-              <h2 className="text-lg font-semibold mb-4">PR 머지 리더보드</h2>
-              <div className="space-y-3">
+            <div>
+              <h2 className="text-sm font-medium text-gray-300 mb-3">PR 머지 리더보드</h2>
+              <div className="space-y-0">
                 {authorStats.map((stat, i) => {
                   const user = authorUserMap.get(stat.authorId);
                   if (!user) return null;
@@ -192,29 +192,29 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
                   return (
                     <div
                       key={stat.authorId}
-                      className="flex items-center gap-4 rounded-lg bg-gray-700/20 px-4 py-3"
+                      className="flex items-center gap-4 px-3 py-2.5 -mx-3 rounded-md hover:bg-gray-800/40 hover:-translate-y-px transition-all duration-200"
                     >
                       <RankBadge rank={i + 1} size="md" />
                       {user.avatarUrl && (
                         <img
                           src={user.avatarUrl}
                           alt={user.login}
-                          className="w-8 h-8 rounded-full"
+                          className="w-6 h-6 rounded-full"
                         />
                       )}
                       <div className="flex-1">
-                        <span className="font-medium text-white">
+                        <span className="text-[13px] font-medium text-white">
                           {user.login}
                         </span>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-600">
                           평균 수정 {(stat._avg.revisionCount ?? 0).toFixed(1)}회
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-white">
+                        <p className="text-[13px] tabular-nums font-medium text-white">
                           {stat._count.id}개
                         </p>
-                        <p className="text-xs text-gray-500">머지된 PR</p>
+                        <p className="text-xs text-gray-600">머지된 PR</p>
                       </div>
                     </div>
                   );
@@ -225,20 +225,20 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
 
           {/* 최근 배지 */}
           {userBadges.length > 0 && (
-            <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-              <h2 className="text-lg font-semibold mb-4">최근 수여된 배지</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <h2 className="text-sm font-medium text-gray-300 mb-3">최근 수여된 배지</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
                 {userBadges.slice(0, 6).map((ub) => (
                   <div
                     key={ub.id}
-                    className="flex items-center gap-3 rounded-lg bg-gray-700/20 px-4 py-3"
+                    className="flex items-center gap-3 px-3 py-2.5 -mx-3 rounded-md hover:bg-gray-800/40 transition-all duration-200"
                   >
-                    <span className="text-2xl">{ub.badge.iconUrl}</span>
+                    <span className="text-xl">{ub.badge.iconUrl}</span>
                     <div>
-                      <p className="text-sm font-medium text-white">
+                      <p className="text-[13px] font-medium text-white">
                         {ub.badge.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-600">
                         {ub.user.login} · {ub.period ?? ""}
                       </p>
                     </div>

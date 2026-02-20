@@ -22,7 +22,7 @@ export default async function ReviewersPage({ params, searchParams }: Props) {
   if (!installation) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">리뷰어 랭킹</h1>
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">리뷰어 랭킹</h1>
         <EmptyState
           icon={<Users className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
@@ -46,8 +46,8 @@ export default async function ReviewersPage({ params, searchParams }: Props) {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">리뷰어 랭킹</h1>
-        <div className="flex gap-1 rounded-lg bg-gray-800/50 border border-gray-700/50 p-1">
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider">리뷰어 랭킹</h1>
+        <div className="flex gap-0.5">
           {[
             { value: "7d", label: "7일" },
             { value: "30d", label: "30일" },
@@ -56,10 +56,10 @@ export default async function ReviewersPage({ params, searchParams }: Props) {
             <a
               key={p.value}
               href={`/${orgSlug}/reviewers?period=${p.value}`}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-xs rounded-md transition-colors duration-200 ${
                 period === p.value
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+                  ? "bg-white/10 text-white"
+                  : "text-gray-500 hover:text-white hover:bg-white/5"
               }`}
             >
               {p.label}
@@ -75,7 +75,7 @@ export default async function ReviewersPage({ params, searchParams }: Props) {
           description="이 기간에 리뷰 활동이 없습니다. 기간을 변경하거나 PR 리뷰가 쌓이기를 기다려주세요."
         />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <ReviewerSpeedChart data={rankings} />
           <ReviewerRankingTable rankings={rankings} />
         </div>

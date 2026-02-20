@@ -23,7 +23,7 @@ export default async function StatsPage({ params, searchParams }: Props) {
   if (!installation) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">핵심 통계</h1>
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">핵심 통계</h1>
         <EmptyState
           icon={<BarChart3 className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
@@ -57,7 +57,7 @@ export default async function StatsPage({ params, searchParams }: Props) {
   if (!hasData) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">핵심 통계</h1>
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">핵심 통계</h1>
         <EmptyState
           icon={<BarChart3 className="w-12 h-12" />}
           title="통계 데이터를 준비 중입니다"
@@ -81,8 +81,8 @@ export default async function StatsPage({ params, searchParams }: Props) {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">핵심 통계</h1>
-        <div className="flex gap-1 rounded-lg bg-gray-800/50 border border-gray-700/50 p-1">
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider">핵심 통계</h1>
+        <div className="flex gap-0.5">
           {[
             { value: "7d", label: "7일" },
             { value: "30d", label: "30일" },
@@ -91,10 +91,10 @@ export default async function StatsPage({ params, searchParams }: Props) {
             <a
               key={p.value}
               href={`/${orgSlug}/stats?period=${p.value}`}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-xs rounded-md transition-colors duration-200 ${
                 period === p.value
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+                  ? "bg-white/10 text-white"
+                  : "text-gray-500 hover:text-white hover:bg-white/5"
               }`}
             >
               {p.label}
@@ -105,23 +105,23 @@ export default async function StatsPage({ params, searchParams }: Props) {
 
       {/* Insights */}
       {(bestHour || bestDay) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-gray-800/50 pb-6 mb-8">
           {bestHour && (
-            <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-              <p className="text-sm text-gray-400 mb-1">가장 빠른 머지 시간대</p>
-              <p className="text-2xl font-bold text-green-400">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">가장 빠른 머지 시간대</p>
+              <p className="text-2xl font-semibold tabular-nums tracking-tight text-green-400">
                 오전 {bestHour.hour}시 - {bestHour.hour + 1}시
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-600 mt-0.5">
                 이 시간대에 올린 PR이 가장 빨리 머지됩니다
               </p>
             </div>
           )}
           {bestDay && (
-            <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-              <p className="text-sm text-gray-400 mb-1">가장 빠른 머지 요일</p>
-              <p className="text-2xl font-bold text-amber-400">{bestDay.dayName}</p>
-              <p className="text-xs text-gray-500 mt-1">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">가장 빠른 머지 요일</p>
+              <p className="text-2xl font-semibold tracking-tight text-indigo-400">{bestDay.dayName}</p>
+              <p className="text-xs text-gray-600 mt-0.5">
                 {bestDay.dayName}에 올린 PR이 가장 빨리 처리됩니다
               </p>
             </div>
@@ -130,7 +130,7 @@ export default async function StatsPage({ params, searchParams }: Props) {
       )}
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <HourlyHeatmap data={hourly} />
         <MergeTimeByDayChart data={daily} />
         <PrSizeChart data={sizeData} />

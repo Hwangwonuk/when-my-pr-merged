@@ -26,7 +26,7 @@ export default async function SettingsPage({ params }: Props) {
   if (!installation) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">설정</h1>
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">설정</h1>
         <EmptyState
           icon={<Settings className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
@@ -41,40 +41,40 @@ export default async function SettingsPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-8">설정</h1>
+      <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">설정</h1>
 
-      <div className="space-y-6">
+      <div className="space-y-0">
         {/* Installation Info */}
-        <section className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-          <h2 className="text-lg font-semibold mb-4">GitHub App 정보</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <section className="border-b border-gray-800/50 pb-6 mb-6">
+          <h2 className="text-sm font-medium text-gray-300 mb-4">GitHub App 정보</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <p className="text-sm text-gray-400 mb-1">조직</p>
+              <p className="text-xs text-gray-500 mb-1">조직</p>
               <div className="flex items-center gap-2">
                 {installation.accountAvatarUrl && (
                   <img
                     src={installation.accountAvatarUrl}
                     alt={orgSlug}
-                    className="w-6 h-6 rounded-full"
+                    className="w-5 h-5 rounded-full"
                   />
                 )}
-                <p className="text-white font-medium">{orgSlug}</p>
+                <p className="text-[13px] text-white font-medium">{orgSlug}</p>
               </div>
             </div>
             <div>
-              <p className="text-sm text-gray-400 mb-1">추적 중인 저장소</p>
-              <p className="text-white font-medium">
+              <p className="text-xs text-gray-500 mb-1">추적 중인 저장소</p>
+              <p className="text-[13px] text-white font-medium">
                 {installation._count.repositories}개
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-400 mb-1">멤버</p>
-              <p className="text-white font-medium">
+              <p className="text-xs text-gray-500 mb-1">멤버</p>
+              <p className="text-[13px] text-white font-medium">
                 {installation._count.members}명
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-400 mb-1">데이터 동기화</p>
+              <p className="text-xs text-gray-500 mb-1">데이터 동기화</p>
               <SyncStatusBadge
                 status={installation.syncStatus}
                 syncedAt={installation.syncedAt}
@@ -83,13 +83,13 @@ export default async function SettingsPage({ params }: Props) {
           </div>
 
           {installation.repositories.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-700/50">
-              <p className="text-sm text-gray-400 mb-2">저장소 목록</p>
-              <div className="flex flex-wrap gap-2">
+            <div className="mt-4 pt-4 border-t border-gray-800/50">
+              <p className="text-xs text-gray-500 mb-2">저장소 목록</p>
+              <div className="flex flex-wrap gap-1.5">
                 {installation.repositories.map((repo) => (
                   <span
                     key={repo.id}
-                    className="text-xs px-2 py-1 rounded bg-gray-700/50 text-gray-300"
+                    className="text-xs px-2 py-0.5 rounded bg-gray-800/50 text-gray-400"
                   >
                     {repo.name}
                   </span>
@@ -100,19 +100,19 @@ export default async function SettingsPage({ params }: Props) {
         </section>
 
         {/* Slack Integration */}
-        <section className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-          <h2 className="text-lg font-semibold mb-4">Slack 연동</h2>
+        <section className="border-b border-gray-800/50 pb-6 mb-6">
+          <h2 className="text-sm font-medium text-gray-300 mb-4">Slack 연동</h2>
 
           {hasSlack ? (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <span className="w-2 h-2 rounded-full bg-green-400" />
-                <p className="text-sm text-green-400 font-medium">연결됨</p>
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                <p className="text-xs text-green-400 font-medium">연결됨</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <p className="text-sm text-gray-400 mb-1">워크스페이스</p>
-                  <p className="text-white">{slack.teamName}</p>
+                  <p className="text-xs text-gray-500 mb-1">워크스페이스</p>
+                  <p className="text-[13px] text-white">{slack.teamName}</p>
                 </div>
                 <ChannelSelector
                   installationId={installation.id}
@@ -123,12 +123,12 @@ export default async function SettingsPage({ params }: Props) {
             </div>
           ) : (
             <div>
-              <p className="text-sm text-gray-400 mb-4">
+              <p className="text-xs text-gray-500 mb-4">
                 Slack을 연결하면 방치 PR 알림, 리뷰 칭찬, 주간 리포트 등을 받을 수 있습니다.
               </p>
               <a
                 href={`/api/slack/install?installationId=${installation.id}`}
-                className="inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium hover:bg-indigo-500 transition-colors"
+                className="inline-flex rounded-md bg-indigo-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-400 transition-colors duration-200"
               >
                 Slack 워크스페이스 연결
               </a>
@@ -137,11 +137,11 @@ export default async function SettingsPage({ params }: Props) {
         </section>
 
         {/* Notification Settings */}
-        <section className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-          <h2 className="text-lg font-semibold mb-4">알림 설정</h2>
+        <section className="border-b border-gray-800/50 pb-6 mb-6">
+          <h2 className="text-sm font-medium text-gray-300 mb-4">알림 설정</h2>
 
           {!hasSlack ? (
-            <p className="text-sm text-gray-500">
+            <p className="text-xs text-gray-600">
               알림을 설정하려면 먼저 Slack을 연동해주세요.
             </p>
           ) : (
@@ -186,9 +186,9 @@ export default async function SettingsPage({ params }: Props) {
         </section>
 
         {/* Setup Checklist */}
-        <section className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-          <h2 className="text-lg font-semibold mb-4">설정 체크리스트</h2>
-          <div className="space-y-3">
+        <section>
+          <h2 className="text-sm font-medium text-gray-300 mb-4">설정 체크리스트</h2>
+          <div className="space-y-2">
             <ChecklistItem
               done={true}
               label="GitHub App 설치"
@@ -225,20 +225,20 @@ function SyncStatusBadge({
   syncedAt: Date | null;
 }) {
   const config: Record<string, { label: string; className: string }> = {
-    pending: { label: "대기 중", className: "bg-gray-700/30 text-gray-400" },
-    syncing: { label: "동기화 중...", className: "bg-yellow-900/30 text-yellow-400" },
-    completed: { label: "완료", className: "bg-green-900/30 text-green-400" },
-    failed: { label: "실패", className: "bg-red-900/30 text-red-400" },
+    pending: { label: "대기 중", className: "text-gray-500" },
+    syncing: { label: "동기화 중...", className: "text-indigo-400" },
+    completed: { label: "완료", className: "text-green-400" },
+    failed: { label: "실패", className: "text-red-400" },
   };
   const { label, className } = config[status] ?? config.pending;
 
   return (
     <div>
-      <span className={`text-xs px-2 py-1 rounded-full ${className}`}>
+      <span className={`text-xs font-medium ${className}`}>
         {label}
       </span>
       {syncedAt && (
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-gray-600 mt-0.5">
           {syncedAt.toLocaleDateString("ko-KR")}
         </p>
       )}
@@ -256,25 +256,25 @@ function ChecklistItem({
   description: string;
 }) {
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-2.5 px-3 py-2 -mx-3 rounded-md hover:bg-gray-800/40 transition-all duration-200">
       <span
-        className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+        className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
           done
-            ? "bg-green-600 text-white"
-            : "bg-gray-700 text-gray-500"
+            ? "bg-green-500 text-white"
+            : "bg-gray-800 text-gray-600"
         }`}
       >
         {done ? "✓" : ""}
       </span>
       <div>
         <p
-          className={`text-sm font-medium ${
-            done ? "text-white" : "text-gray-400"
+          className={`text-[13px] font-medium ${
+            done ? "text-white" : "text-gray-500"
           }`}
         >
           {label}
         </p>
-        <p className="text-xs text-gray-500">{description}</p>
+        <p className="text-xs text-gray-600">{description}</p>
       </div>
     </div>
   );

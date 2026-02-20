@@ -3,7 +3,7 @@ import { getOverviewStats } from "@/lib/stats/calculator";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FileText } from "lucide-react";
 import { formatDuration, formatPercentage, formatNumber } from "@/lib/utils/format";
-import { subDays, subMonths, format, startOfMonth, endOfMonth } from "date-fns";
+import { subMonths, format, startOfMonth, endOfMonth } from "date-fns";
 import { ko } from "date-fns/locale";
 
 interface Props {
@@ -20,7 +20,7 @@ export default async function ReportsPage({ params }: Props) {
   if (!installation) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">리포트</h1>
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">리포트</h1>
         <EmptyState
           icon={<FileText className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
@@ -57,7 +57,7 @@ export default async function ReportsPage({ params }: Props) {
   if (!hasData) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">리포트</h1>
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">리포트</h1>
         <EmptyState
           icon={<FileText className="w-12 h-12" />}
           title="리포트를 생성 중입니다"
@@ -83,37 +83,37 @@ export default async function ReportsPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-8">리포트</h1>
+      <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">리포트</h1>
 
       {/* 이번 달 요약 */}
-      <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">
+      <div className="border-b border-gray-800/50 pb-6 mb-8">
+        <h2 className="text-sm font-medium text-gray-300 mb-4">
           {monthlyStats[0].label} 요약
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
-            <p className="text-sm text-gray-400 mb-1">총 PR</p>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-xs text-gray-500 mb-1">총 PR</p>
+            <p className="text-2xl font-semibold tabular-nums tracking-tight text-white">
               {formatNumber(current.totalPRs)}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-400 mb-1">머지된 PR</p>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-xs text-gray-500 mb-1">머지된 PR</p>
+            <p className="text-2xl font-semibold tabular-nums tracking-tight text-white">
               {formatNumber(current.mergedPRs)}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-400 mb-1">평균 머지 시간</p>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-xs text-gray-500 mb-1">평균 머지 시간</p>
+            <p className="text-2xl font-semibold tabular-nums tracking-tight text-white">
               {current.avgTimeToMergeMs > 0
                 ? formatDuration(current.avgTimeToMergeMs)
                 : "--"}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-400 mb-1">머지율</p>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-xs text-gray-500 mb-1">머지율</p>
+            <p className="text-2xl font-semibold tabular-nums tracking-tight text-white">
               {current.totalPRs > 0
                 ? formatPercentage(current.mergeRate, 0)
                 : "--"}
@@ -124,21 +124,21 @@ export default async function ReportsPage({ params }: Props) {
 
       {/* 전월 대비 변화 */}
       {previous.totalPRs > 0 && (
-        <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">전월 대비 변화</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-lg bg-gray-700/20 px-4 py-3">
-              <p className="text-sm text-gray-400 mb-1">PR 수 변화</p>
-              <div className="flex items-center gap-2">
-                <p className="text-xl font-bold text-white">
+        <div className="border-b border-gray-800/50 pb-6 mb-8">
+          <h2 className="text-sm font-medium text-gray-300 mb-4">전월 대비 변화</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">PR 수 변화</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-xl font-semibold tabular-nums tracking-tight text-white">
                   {current.totalPRs - previous.totalPRs > 0 ? "+" : ""}
                   {current.totalPRs - previous.totalPRs}개
                 </p>
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full ${
+                  className={`text-xs tabular-nums ${
                     current.totalPRs >= previous.totalPRs
-                      ? "bg-green-900/30 text-green-400"
-                      : "bg-red-900/30 text-red-400"
+                      ? "text-green-400"
+                      : "text-red-400"
                   }`}
                 >
                   {previous.totalPRs > 0
@@ -147,20 +147,20 @@ export default async function ReportsPage({ params }: Props) {
                 </span>
               </div>
             </div>
-            <div className="rounded-lg bg-gray-700/20 px-4 py-3">
-              <p className="text-sm text-gray-400 mb-1">평균 머지 시간 변화</p>
-              <div className="flex items-center gap-2">
-                <p className="text-xl font-bold text-white">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">평균 머지 시간 변화</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-xl font-semibold tabular-nums tracking-tight text-white">
                   {current.avgTimeToMergeMs > 0
                     ? formatDuration(current.avgTimeToMergeMs)
                     : "--"}
                 </p>
                 {mergeTimeDiff !== 0 && (
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${
+                    className={`text-xs tabular-nums ${
                       mergeTimeDiff < 0
-                        ? "bg-green-900/30 text-green-400"
-                        : "bg-red-900/30 text-red-400"
+                        ? "text-green-400"
+                        : "text-red-400"
                     }`}
                   >
                     {mergeTimeDiff > 0 ? "+" : ""}
@@ -169,22 +169,22 @@ export default async function ReportsPage({ params }: Props) {
                 )}
               </div>
             </div>
-            <div className="rounded-lg bg-gray-700/20 px-4 py-3">
-              <p className="text-sm text-gray-400 mb-1">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">
                 평균 첫 리뷰 시간 변화
               </p>
-              <div className="flex items-center gap-2">
-                <p className="text-xl font-bold text-white">
+              <div className="flex items-baseline gap-2">
+                <p className="text-xl font-semibold tabular-nums tracking-tight text-white">
                   {current.avgTimeToFirstReviewMs > 0
                     ? formatDuration(current.avgTimeToFirstReviewMs)
                     : "--"}
                 </p>
                 {firstReviewDiff !== 0 && (
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${
+                    className={`text-xs tabular-nums ${
                       firstReviewDiff < 0
-                        ? "bg-green-900/30 text-green-400"
-                        : "bg-red-900/30 text-red-400"
+                        ? "text-green-400"
+                        : "text-red-400"
                     }`}
                   >
                     {firstReviewDiff > 0 ? "+" : ""}
@@ -198,44 +198,44 @@ export default async function ReportsPage({ params }: Props) {
       )}
 
       {/* 월별 추이 */}
-      <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-        <h2 className="text-lg font-semibold mb-4">월별 추이</h2>
+      <div>
+        <h2 className="text-sm font-medium text-gray-300 mb-4">월별 추이</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-gray-400 border-b border-gray-700">
-                <th className="pb-3 font-medium">기간</th>
-                <th className="pb-3 font-medium text-right">총 PR</th>
-                <th className="pb-3 font-medium text-right">머지 PR</th>
-                <th className="pb-3 font-medium text-right">평균 머지 시간</th>
-                <th className="pb-3 font-medium text-right">평균 첫 리뷰</th>
-                <th className="pb-3 font-medium text-right">머지율</th>
+              <tr className="text-left border-b border-gray-800/50">
+                <th className="pb-2.5 text-xs text-gray-500 font-medium">기간</th>
+                <th className="pb-2.5 text-xs text-gray-500 font-medium text-right">총 PR</th>
+                <th className="pb-2.5 text-xs text-gray-500 font-medium text-right">머지 PR</th>
+                <th className="pb-2.5 text-xs text-gray-500 font-medium text-right">평균 머지 시간</th>
+                <th className="pb-2.5 text-xs text-gray-500 font-medium text-right">평균 첫 리뷰</th>
+                <th className="pb-2.5 text-xs text-gray-500 font-medium text-right">머지율</th>
               </tr>
             </thead>
             <tbody>
               {monthlyStats.map((m) => (
                 <tr
                   key={m.label}
-                  className="border-b border-gray-800 text-gray-300"
+                  className="border-b border-gray-800/30 hover:bg-gray-800/40 transition-all duration-200"
                 >
-                  <td className="py-3 font-medium text-white">{m.label}</td>
-                  <td className="py-3 text-right">
+                  <td className="py-2.5 text-[13px] font-medium text-white">{m.label}</td>
+                  <td className="py-2.5 text-[13px] text-right text-gray-400 tabular-nums">
                     {formatNumber(m.stats.totalPRs)}
                   </td>
-                  <td className="py-3 text-right">
+                  <td className="py-2.5 text-[13px] text-right text-gray-400 tabular-nums">
                     {formatNumber(m.stats.mergedPRs)}
                   </td>
-                  <td className="py-3 text-right">
+                  <td className="py-2.5 text-[13px] text-right text-gray-400 tabular-nums">
                     {m.stats.avgTimeToMergeMs > 0
                       ? formatDuration(m.stats.avgTimeToMergeMs)
                       : "--"}
                   </td>
-                  <td className="py-3 text-right">
+                  <td className="py-2.5 text-[13px] text-right text-gray-400 tabular-nums">
                     {m.stats.avgTimeToFirstReviewMs > 0
                       ? formatDuration(m.stats.avgTimeToFirstReviewMs)
                       : "--"}
                   </td>
-                  <td className="py-3 text-right">
+                  <td className="py-2.5 text-[13px] text-right text-gray-400 tabular-nums">
                     {m.stats.totalPRs > 0
                       ? formatPercentage(m.stats.mergeRate, 0)
                       : "--"}

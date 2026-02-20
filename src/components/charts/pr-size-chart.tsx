@@ -17,7 +17,7 @@ interface PrSizeChartProps {
   data: SizeAnalysis[];
 }
 
-const COLORS = ["#34d399", "#60a5fa", "#f59e0b", "#ef4444"];
+const INDIGO_GRADIENT = ["#a5b4fc", "#818cf8", "#6366f1", "#4f46e5"];
 
 export function PrSizeChart({ data }: PrSizeChartProps) {
   const chartData = data
@@ -28,35 +28,36 @@ export function PrSizeChart({ data }: PrSizeChartProps) {
     }));
 
   return (
-    <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-      <h3 className="text-lg font-semibold mb-4">PR 크기별 머지 시간</h3>
+    <div>
+      <h3 className="text-sm font-medium text-gray-300 mb-4">PR 크기별 머지 시간</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis dataKey="label" stroke="#9ca3af" fontSize={12} />
-          <YAxis stroke="#9ca3af" fontSize={12} unit="h" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+          <XAxis dataKey="label" stroke="#6b7280" fontSize={12} />
+          <YAxis stroke="#6b7280" fontSize={12} unit="h" />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1f2937",
-              border: "1px solid #374151",
-              borderRadius: "8px",
+              backgroundColor: "#111827",
+              border: "1px solid rgba(31,41,55,0.5)",
+              borderRadius: "6px",
               color: "#fff",
+              fontSize: "13px",
             }}
             formatter={(value) => [
               formatDuration(Number(value) * 3_600_000),
               "평균 머지 시간",
             ]}
           />
-          <Bar dataKey="avgHours" radius={[4, 4, 0, 0]}>
+          <Bar dataKey="avgHours" radius={[3, 3, 0, 0]}>
             {chartData.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell key={`cell-${index}`} fill={INDIGO_GRADIENT[index % INDIGO_GRADIENT.length]} />
             ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <div className="mt-2 text-xs text-gray-400 text-center">
+      <p className="mt-2 text-xs text-gray-600 text-center">
         PR 크기가 작을수록 머지가 빠릅니다
-      </div>
+      </p>
     </div>
   );
 }

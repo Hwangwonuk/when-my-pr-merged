@@ -4,7 +4,7 @@ import { getConflictPatterns } from "@/lib/stats/conflict-patterns";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Lightbulb, AlertTriangle } from "lucide-react";
 import { BottleneckAnalysisView } from "@/components/dashboard/bottleneck-analysis";
-import { formatDuration, formatPercentage, getDayNameKo } from "@/lib/utils/format";
+import { formatDuration, formatPercentage } from "@/lib/utils/format";
 import { subDays } from "date-fns";
 
 interface Props {
@@ -23,7 +23,7 @@ export default async function InsightsPage({ params, searchParams }: Props) {
   if (!installation) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">인사이트</h1>
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">인사이트</h1>
         <EmptyState
           icon={<Lightbulb className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
@@ -73,8 +73,8 @@ export default async function InsightsPage({ params, searchParams }: Props) {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">인사이트</h1>
-        <div className="flex gap-1 rounded-lg bg-gray-800/50 border border-gray-700/50 p-1">
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider">인사이트</h1>
+        <div className="flex gap-0.5">
           {[
             { value: "7d", label: "7일" },
             { value: "30d", label: "30일" },
@@ -83,10 +83,10 @@ export default async function InsightsPage({ params, searchParams }: Props) {
             <a
               key={p.value}
               href={`/${orgSlug}/insights?period=${p.value}`}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-xs rounded-md transition-colors duration-200 ${
                 period === p.value
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+                  ? "bg-white/10 text-white"
+                  : "text-gray-500 hover:text-white hover:bg-white/5"
               }`}
             >
               {p.label}
@@ -102,44 +102,44 @@ export default async function InsightsPage({ params, searchParams }: Props) {
           description="충분한 데이터가 수집되면 병목 지점 분석과 재작업 통계를 확인할 수 있습니다."
         />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           <BottleneckAnalysisView data={bottleneck} />
 
           {/* Rework Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-              <p className="text-sm text-gray-400 mb-1">평균 수정 횟수</p>
-              <p className="text-3xl font-bold text-white">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-gray-800/50 pb-6">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">평균 수정 횟수</p>
+              <p className="text-2xl font-semibold tabular-nums tracking-tight text-white">
                 {avgRevisionCount.toFixed(1)}회
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-600 mt-0.5">
                 리뷰 시작 후 머지까지 평균 코드 수정 횟수
               </p>
             </div>
-            <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-              <p className="text-sm text-gray-400 mb-1">평균 리뷰 사이클</p>
-              <p className="text-3xl font-bold text-white">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">평균 리뷰 사이클</p>
+              <p className="text-2xl font-semibold tabular-nums tracking-tight text-white">
                 {avgReviewCycles.toFixed(1)}회
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-600 mt-0.5">
                 Changes Requested → 재리뷰 사이클 횟수
               </p>
             </div>
           </div>
 
-          {/* Key Insight Cards */}
-          <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-            <h3 className="text-lg font-semibold mb-4">핵심 인사이트</h3>
-            <div className="space-y-3">
-              <div className="rounded-lg bg-gray-700/30 px-4 py-3 text-sm text-gray-300">
-                "첫 리뷰까지 평균 {formatDuration(bottleneck.avgTimeToFirstReviewMs)} vs 승인 후 머지까지 {formatDuration(bottleneck.avgApprovalToMergeMs)}"
-              </div>
-              <div className="rounded-lg bg-gray-700/30 px-4 py-3 text-sm text-gray-300">
-                "평균 {avgRevisionCount.toFixed(1)}회 수정 후 머지"
-              </div>
+          {/* Key Insights */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-300 mb-3">핵심 인사이트</h3>
+            <div className="space-y-2">
+              <p className="text-[13px] text-gray-400 px-3 py-2.5 -mx-3 rounded-md hover:bg-gray-800/40 transition-all duration-200">
+                첫 리뷰까지 평균 {formatDuration(bottleneck.avgTimeToFirstReviewMs)} vs 승인 후 머지까지 {formatDuration(bottleneck.avgApprovalToMergeMs)}
+              </p>
+              <p className="text-[13px] text-gray-400 px-3 py-2.5 -mx-3 rounded-md hover:bg-gray-800/40 transition-all duration-200">
+                평균 {avgRevisionCount.toFixed(1)}회 수정 후 머지
+              </p>
               {bottleneck.avgTimeToFirstReviewMs > bottleneck.avgFirstReviewToApprovalMs + bottleneck.avgApprovalToMergeMs && (
-                <div className="flex items-start gap-2 rounded-lg bg-amber-900/20 border border-amber-700/30 px-4 py-3 text-sm text-amber-300">
-                  <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2 text-[13px] text-red-400 px-3 py-2.5 -mx-3">
+                  <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                   <span>첫 리뷰까지의 대기 시간이 가장 큰 병목입니다. 리뷰 요청 후 빠른 응답을 독려해보세요.</span>
                 </div>
               )}
@@ -148,31 +148,31 @@ export default async function InsightsPage({ params, searchParams }: Props) {
 
           {/* Conflict Pattern Analysis */}
           {conflictPatterns.totalPRs > 0 && (
-            <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-              <h3 className="text-lg font-semibold mb-4">컨플릭트 패턴 분석</h3>
+            <div>
+              <h3 className="text-sm font-medium text-gray-300 mb-4">컨플릭트 패턴 분석</h3>
 
               {/* Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="rounded-lg bg-gray-700/30 p-4 text-center">
-                  <p className="text-sm text-gray-400">컨플릭트 발생률</p>
-                  <p className="text-2xl font-bold text-white mt-1">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border-b border-gray-800/50 pb-6 mb-6">
+                <div>
+                  <p className="text-xs text-gray-500">컨플릭트 발생률</p>
+                  <p className="text-2xl font-semibold tabular-nums tracking-tight text-white mt-1">
                     {formatPercentage(conflictPatterns.conflictRate * 100)}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-600 mt-0.5">
                     {conflictPatterns.conflictPRs}/{conflictPatterns.totalPRs} PR
                   </p>
                 </div>
-                <div className="rounded-lg bg-gray-700/30 p-4 text-center">
-                  <p className="text-sm text-gray-400">평균 해결 시간</p>
-                  <p className="text-2xl font-bold text-white mt-1">
+                <div>
+                  <p className="text-xs text-gray-500">평균 해결 시간</p>
+                  <p className="text-2xl font-semibold tabular-nums tracking-tight text-white mt-1">
                     {conflictPatterns.avgResolutionTimeMs > 0
                       ? formatDuration(conflictPatterns.avgResolutionTimeMs)
                       : "-"}
                   </p>
                 </div>
-                <div className="rounded-lg bg-gray-700/30 p-4 text-center">
-                  <p className="text-sm text-gray-400">가장 위험한 요일</p>
-                  <p className="text-2xl font-bold text-white mt-1">
+                <div>
+                  <p className="text-xs text-gray-500">가장 위험한 요일</p>
+                  <p className="text-2xl font-semibold tracking-tight text-white mt-1">
                     {(() => {
                       const worst = conflictPatterns.byDay
                         .filter((d) => d.totalCount > 0)
@@ -185,26 +185,20 @@ export default async function InsightsPage({ params, searchParams }: Props) {
 
               {/* By Day */}
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-gray-400 mb-3">요일별 컨플릭트 발생률</h4>
+                <h4 className="text-xs text-gray-500 mb-3">요일별 컨플릭트 발생률</h4>
                 <div className="flex gap-2">
                   {conflictPatterns.byDay.map((day) => {
                     const height = day.conflictRate > 0 ? Math.max(day.conflictRate * 200, 4) : 4;
-                    const color =
-                      day.conflictRate > 0.3
-                        ? "bg-red-500"
-                        : day.conflictRate > 0.15
-                          ? "bg-amber-500"
-                          : "bg-emerald-500";
                     return (
                       <div key={day.dayOfWeek} className="flex-1 flex flex-col items-center gap-1">
                         <div className="h-[100px] flex items-end w-full">
                           <div
-                            className={`w-full rounded-t ${day.totalCount > 0 ? color : "bg-gray-700"}`}
-                            style={{ height: `${Math.min(height, 100)}px` }}
+                            className={`w-full rounded-t ${day.totalCount > 0 ? "bg-indigo-500" : "bg-gray-800/30"}`}
+                            style={{ height: `${Math.min(height, 100)}px`, opacity: day.totalCount > 0 ? Math.max(day.conflictRate * 2, 0.2) : 0.1 }}
                           />
                         </div>
-                        <span className="text-xs text-gray-400">{day.dayName}</span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500">{day.dayName}</span>
+                        <span className="text-xs text-gray-600 tabular-nums">
                           {day.totalCount > 0 ? formatPercentage(day.conflictRate * 100) : "-"}
                         </span>
                       </div>
@@ -215,24 +209,18 @@ export default async function InsightsPage({ params, searchParams }: Props) {
 
               {/* By Size */}
               <div>
-                <h4 className="text-sm font-medium text-gray-400 mb-3">PR 크기별 컨플릭트 발생률</h4>
+                <h4 className="text-xs text-gray-500 mb-3">PR 크기별 컨플릭트 발생률</h4>
                 <div className="space-y-2">
                   {conflictPatterns.bySize.map((size) => (
                     <div key={size.bucket} className="flex items-center gap-3">
-                      <span className="text-sm text-gray-400 w-8">{size.bucket}</span>
-                      <div className="flex-1 h-6 bg-gray-700/50 rounded-full overflow-hidden">
+                      <span className="text-xs text-gray-500 w-8">{size.bucket}</span>
+                      <div className="flex-1 h-2 bg-gray-800/50 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all ${
-                            size.conflictRate > 0.3
-                              ? "bg-red-500/70"
-                              : size.conflictRate > 0.15
-                                ? "bg-amber-500/70"
-                                : "bg-emerald-500/70"
-                          }`}
+                          className="h-full rounded-full bg-indigo-500 transition-all"
                           style={{ width: `${Math.max(size.conflictRate * 100, 1)}%` }}
                         />
                       </div>
-                      <span className="text-sm text-gray-300 w-16 text-right">
+                      <span className="text-xs text-gray-400 tabular-nums w-16 text-right">
                         {size.totalCount > 0 ? formatPercentage(size.conflictRate * 100) : "-"}
                       </span>
                     </div>
@@ -242,8 +230,8 @@ export default async function InsightsPage({ params, searchParams }: Props) {
 
               {/* Insights */}
               {conflictPatterns.conflictRate > 0.2 && (
-                <div className="mt-4 flex items-start gap-2 rounded-lg bg-amber-900/20 border border-amber-700/30 px-4 py-3 text-sm text-amber-300">
-                  <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                <div className="mt-4 flex items-start gap-2 text-[13px] text-red-400">
+                  <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                   <span>컨플릭트 발생률이 {formatPercentage(conflictPatterns.conflictRate * 100)}로 높습니다.
                   PR을 더 작게 나누고, 베이스 브랜치를 자주 리베이스하는 것을 권장합니다.</span>
                 </div>
@@ -257,10 +245,10 @@ export default async function InsightsPage({ params, searchParams }: Props) {
                   xlConflict.conflictRate > sConflict.conflictRate * 2
                 ) {
                   return (
-                    <div className="mt-2 rounded-lg bg-gray-700/30 px-4 py-3 text-sm text-gray-300">
+                    <p className="mt-2 text-[13px] text-gray-500">
                       XL PR의 컨플릭트 발생률({formatPercentage(xlConflict.conflictRate * 100)})이
                       S PR({formatPercentage(sConflict.conflictRate * 100)})보다 {(xlConflict.conflictRate / sConflict.conflictRate).toFixed(1)}배 높습니다.
-                    </div>
+                    </p>
                   );
                 }
                 return null;

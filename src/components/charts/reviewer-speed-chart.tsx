@@ -27,32 +27,33 @@ export function ReviewerSpeedChart({ data }: ReviewerSpeedChartProps) {
     }));
 
   return (
-    <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-      <h3 className="text-lg font-semibold mb-4">리뷰어 응답 속도 (Top 10)</h3>
+    <div>
+      <h3 className="text-sm font-medium text-gray-300 mb-4">리뷰어 응답 속도 (Top 10)</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData} layout="vertical">
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis type="number" stroke="#9ca3af" fontSize={12} unit="h" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+          <XAxis type="number" stroke="#6b7280" fontSize={12} unit="h" />
           <YAxis
             type="category"
             dataKey="login"
-            stroke="#9ca3af"
+            stroke="#6b7280"
             fontSize={12}
             width={100}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1f2937",
-              border: "1px solid #374151",
-              borderRadius: "8px",
+              backgroundColor: "#111827",
+              border: "1px solid rgba(31,41,55,0.5)",
+              borderRadius: "6px",
               color: "#fff",
+              fontSize: "13px",
             }}
             formatter={(value) => [
               formatDuration(Number(value) * 3_600_000),
               "평균 응답 시간",
             ]}
           />
-          <Bar dataKey="avgHours" fill="#818cf8" radius={[0, 4, 4, 0]} />
+          <Bar dataKey="avgHours" fill="#6366f1" radius={[0, 3, 3, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

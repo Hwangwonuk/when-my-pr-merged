@@ -67,7 +67,7 @@ export default async function OrgDashboardPage({ params }: Props) {
   if (!installation) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">{orgSlug}</h1>
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">{orgSlug}</h1>
         <EmptyState
           icon={<Link2 className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
@@ -94,8 +94,8 @@ export default async function OrgDashboardPage({ params }: Props) {
   if (overview.totalPRs === 0) {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-8">{orgSlug} 대시보드</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">{orgSlug} 대시보드</h1>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 border-b border-gray-800/50 pb-6 mb-8">
           <StatsCard title="총 PR 수" value="0" subtitle="최근 30일" />
           <StatsCard title="평균 머지 시간" value="--" subtitle="데이터 없음" />
           <StatsCard title="평균 첫 리뷰 시간" value="--" subtitle="데이터 없음" />
@@ -112,34 +112,30 @@ export default async function OrgDashboardPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-8">{orgSlug} 대시보드</h1>
+      <h1 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-8">{orgSlug} 대시보드</h1>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 border-b border-gray-800/50 pb-6 mb-8">
         <StatsCard
           title="총 PR 수"
           value={formatNumber(overview.totalPRs)}
           subtitle={`머지: ${overview.mergedPRs} / 오픈: ${overview.openPRs}`}
-          color="sky"
         />
         <StatsCard
           title="평균 머지 시간"
           value={formatDuration(overview.avgTimeToMergeMs)}
           subtitle={`중앙값: ${formatDuration(overview.medianTimeToMergeMs)}`}
           trend={overview.trend.timeToMerge}
-          color="amber"
         />
         <StatsCard
           title="평균 첫 리뷰 시간"
           value={formatDuration(overview.avgTimeToFirstReviewMs)}
           trend={overview.trend.timeToFirstReview}
-          color="rose"
         />
         <StatsCard
           title="머지율"
           value={formatPercentage(overview.mergeRate, 0)}
           subtitle={`평균 ${overview.avgRevisionCount.toFixed(1)}회 수정 후 머지`}
-          color="emerald"
         />
       </div>
 
@@ -148,13 +144,13 @@ export default async function OrgDashboardPage({ params }: Props) {
 
       {/* Top Reviewers */}
       {topReviewers.length > 0 && (
-        <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-6">
-          <h2 className="text-lg font-semibold mb-4">Top 리뷰어 (최근 30일)</h2>
-          <div className="space-y-3">
+        <div>
+          <h2 className="text-sm font-medium text-gray-300 mb-3">Top 리뷰어 (최근 30일)</h2>
+          <div className="space-y-0">
             {topReviewers.map((reviewer) => (
               <div
                 key={reviewer.user.id}
-                className="flex items-center justify-between"
+                className="flex items-center justify-between px-3 py-2.5 -mx-3 rounded-md hover:bg-gray-800/40 transition-all duration-200"
               >
                 <div className="flex items-center gap-3">
                   <RankBadge rank={reviewer.rank} />
@@ -162,12 +158,12 @@ export default async function OrgDashboardPage({ params }: Props) {
                     <img
                       src={reviewer.user.avatarUrl}
                       alt={reviewer.user.login}
-                      className="w-6 h-6 rounded-full"
+                      className="w-5 h-5 rounded-full"
                     />
                   )}
-                  <span className="text-sm text-white">{reviewer.user.login}</span>
+                  <span className="text-[13px] text-white">{reviewer.user.login}</span>
                 </div>
-                <div className="text-sm text-gray-400">
+                <div className="text-[13px] text-gray-500 tabular-nums">
                   {reviewer.avgResponseTimeMs > 0
                     ? formatDuration(reviewer.avgResponseTimeMs)
                     : "N/A"}{" "}

@@ -39,7 +39,7 @@ export default async function LoginPage() {
             </ScrollReveal>
             <ScrollReveal delay={150}>
               <h1 className="text-5xl md:text-8xl font-bold tracking-tight leading-[0.95] text-gray-400">
-                얼마나 기다려요?
+                얼마나 기다리나요?
               </h1>
             </ScrollReveal>
             <ScrollReveal delay={350}>
@@ -64,16 +64,19 @@ export default async function LoginPage() {
             <div>
               <ScrollReveal>
                 <p className="text-2xl md:text-3xl text-gray-300 leading-relaxed mb-8">
-                  코드 작성 시간은 체감합니다.
-                  배포 시간은 CI가 알려줍니다.
-                  그런데 리뷰를 기다리는 시간은요?
+                  코드 작성 시간은 체감합니다.<br />
+                  배포 시간은 CI가 알려줍니다.<br />
+                  <br />
+                  그런데 리뷰를 기다리는 시간은?<br />
                   아무도 측정하지 않습니다.
                 </p>
               </ScrollReveal>
               <ScrollReveal delay={200}>
                 <p className="text-lg text-gray-500 leading-relaxed">
-                  첫 리뷰까지 평균 몇 시간인지 아는 팀은 거의 없습니다.
-                  측정하지 않으면 개선할 수 없고,
+                  첫 리뷰까지 평균 몇 시간인지<br />
+                  아는 팀은 거의 없습니다.<br />
+                  <br />
+                  측정하지 않으면 개선할 수 없고,<br />
                   개선하지 않으면 같은 패턴이 반복됩니다.
                 </p>
               </ScrollReveal>
@@ -93,8 +96,9 @@ export default async function LoginPage() {
           </ScrollReveal>
           <ScrollReveal delay={300}>
             <p className="text-base text-gray-500 max-w-lg mt-12">
-              GitHub App을 설치하면 PR 이벤트를 자동으로 수집합니다.
-              기능을 설정하는 게 아니라, 설치하면 바로 보이기 시작합니다.
+              GitHub App을 설치하면<br />
+              PR 이벤트를 자동으로 수집합니다.<br />
+              별도 설정 없이, 설치만 하면 바로 보입니다.
             </p>
           </ScrollReveal>
         </section>
@@ -111,17 +115,17 @@ export default async function LoginPage() {
               {
                 num: "01",
                 title: "GitHub App 설치",
-                desc: "조직이나 개인 계정에 설치합니다. PR 읽기 권한만 요청합니다.",
+                desc: "조직이나 개인 계정에 설치하세요.\nPR 읽기 권한만 필요합니다.",
               },
               {
                 num: "02",
                 title: "자동 수집",
-                desc: "PR 생성부터 머지까지, 모든 이벤트를 웹훅으로 받아 기록합니다.",
+                desc: "PR 생성부터 머지까지,\n모든 이벤트를 웹훅으로 받아 기록합니다.",
               },
               {
                 num: "03",
                 title: "대시보드 & Slack",
-                desc: "통계는 대시보드에서, 알림은 Slack으로. 설정할 게 거의 없습니다.",
+                desc: "통계는 대시보드에서, 알림은 Slack으로.\n별도 설정이 거의 필요 없습니다.",
               },
             ].map((step, i) => (
               <ScrollReveal key={step.num} delay={i * 150}>
@@ -130,7 +134,7 @@ export default async function LoginPage() {
                     {step.num}
                   </p>
                   <p className="text-xl font-semibold mb-2">{step.title}</p>
-                  <p className="text-sm text-gray-500 leading-relaxed">
+                  <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">
                     {step.desc}
                   </p>
                 </div>
@@ -149,12 +153,14 @@ export default async function LoginPage() {
                 </p>
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   대시보드를 매번<br />
-                  열어볼 순 없으니까
+                  확인할 수 없으니까
                 </h2>
                 <p className="text-gray-500 leading-relaxed">
-                  방치된 PR 리마인더, 빠른 리뷰 칭찬,
-                  Hot Streak 알림이 팀 채널로 갑니다.
-                  매일 다이제스트와 주간 리포트도 자동으로.
+                  방치된 PR 리마인더, 빠른 리뷰 칭찬,<br />
+                  Hot Streak 알림이 팀 채널로 전송됩니다.<br />
+                  <br />
+                  매일 다이제스트와 주간 리포트도<br />
+                  자동으로 받아볼 수 있습니다.
                 </p>
               </div>
             </ScrollReveal>
@@ -170,7 +176,7 @@ export default async function LoginPage() {
             <div className="max-w-3xl">
               <h2 className="text-3xl md:text-5xl font-bold leading-tight mb-8">
                 측정하는 것부터<br />
-                시작하세요
+                시작해 보세요
               </h2>
               <a
                 href={githubAuthUrl}
