@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 
 export default function DashboardError({
@@ -9,6 +10,10 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error("[Dashboard Error]", error);
+  }, [error]);
+
   return (
     <div className="max-w-lg mx-auto text-center py-16">
       <div className="mb-4 flex justify-center text-amber-400">
@@ -18,6 +23,11 @@ export default function DashboardError({
       <p className="text-gray-400 mb-6">
         대시보드 데이터를 불러오는 중 오류가 발생했습니다.
       </p>
+      {error.message && (
+        <p className="text-xs text-gray-600 mb-4 font-mono break-all max-w-md mx-auto">
+          {error.digest ?? error.message}
+        </p>
+      )}
       <button
         onClick={reset}
         className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"

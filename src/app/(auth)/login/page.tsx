@@ -250,7 +250,7 @@ export default async function LoginPage() {
 
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-500">
-        <p>&copy; 2025 내 PR 언제 머지돼? All rights reserved.</p>
+        <p>&copy; 2026 내 PR 언제 머지돼? All rights reserved.</p>
       </footer>
     </div>
   );
