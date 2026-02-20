@@ -33,6 +33,8 @@ export async function POST(req: NextRequest) {
     const client = getSlackClient(slack.botToken);
     const message = slackMessages.testMessage(slack.channelName);
 
+    await client.conversations.join({ channel: slack.channelId });
+
     const result = await client.chat.postMessage({
       channel: slack.channelId,
       blocks: message.blocks,
