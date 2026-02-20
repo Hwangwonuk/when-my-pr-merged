@@ -3,10 +3,10 @@
 import { useState } from "react";
 
 const features = [
-  "리뷰 응답 시간 추적",
-  "시간대별 머지 패턴",
-  "PR 크기별 분석",
-  "리뷰어 랭킹 & 배지",
+  "누가 빨리 리뷰하는지 보인다",
+  "언제 머지될지 예측된다",
+  "방치된 PR이 알아서 알림 간다",
+  "리뷰가 재미있어진다",
 ];
 
 export function FeatureLines() {
