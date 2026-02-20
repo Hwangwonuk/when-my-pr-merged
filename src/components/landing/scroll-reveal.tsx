@@ -6,12 +6,20 @@ interface ScrollRevealProps {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  direction?: "up" | "left" | "right";
 }
+
+const transforms: Record<string, string> = {
+  up: "translateY(20px)",
+  left: "translateX(-20px)",
+  right: "translateX(20px)",
+};
 
 export function ScrollReveal({
   children,
   className,
   delay = 0,
+  direction = "up",
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -40,8 +48,8 @@ export function ScrollReveal({
       className={className}
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: isVisible ? "translateY(0)" : "translateY(20px)",
-        transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
+        transform: isVisible ? "translate(0)" : transforms[direction],
+        transition: `opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
     >
       {children}
