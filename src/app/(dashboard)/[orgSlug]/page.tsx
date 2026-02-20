@@ -6,9 +6,9 @@ import { StatsCard } from "@/components/dashboard/stats-card";
 import { PredictionWidget } from "@/components/dashboard/prediction-widget";
 import { EmptyState } from "@/components/shared/empty-state";
 import { RankBadge } from "@/components/shared/rank-badge";
-import { formatDuration, formatPercentage, formatNumber } from "@/lib/utils/format";
+import { formatDuration, formatPercentage, formatNumber, formatRelativeTime } from "@/lib/utils/format";
 import { subDays } from "date-fns";
-import { Link2, Rocket } from "lucide-react";
+import { Link2, Rocket, GitPullRequest, AlertCircle } from "lucide-react";
 
 interface Props {
   params: Promise<{ orgSlug: string }>;
@@ -86,9 +86,37 @@ export default async function OrgDashboardPage({ params }: Props) {
     to: now.toISOString(),
   };
 
-  const [overview, topReviewers] = await Promise.all([
+  const [overview, topReviewers, recentMerged, stalePRs] = await Promise.all([
     getOverviewStats(dateParams),
     getReviewerRankings({ ...dateParams, limit: 5 }),
+    prisma.pullRequest.findMany({
+      where: {
+        repository: { installationId: installation.id },
+        state: "merged",
+        mergedAt: { gte: thirtyDaysAgo },
+      },
+      include: {
+        author: { select: { login: true, avatarUrl: true } },
+        repository: { select: { name: true, fullName: true } },
+      },
+      orderBy: { mergedAt: "desc" },
+      take: 5,
+    }),
+    prisma.pullRequest.findMany({
+      where: {
+        repository: { installationId: installation.id },
+        state: "open",
+        draft: false,
+        firstReviewAt: null,
+        createdAt: { lte: subDays(now, 1) },
+      },
+      include: {
+        author: { select: { login: true, avatarUrl: true } },
+        repository: { select: { name: true, fullName: true } },
+      },
+      orderBy: { createdAt: "asc" },
+      take: 5,
+    }),
   ]);
 
   if (overview.totalPRs === 0) {
@@ -142,9 +170,55 @@ export default async function OrgDashboardPage({ params }: Props) {
       {/* Merge Predictions */}
       <OpenPRPredictions installationId={installation.id} />
 
+      {/* Stale PRs */}
+      {stalePRs.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-400" />
+            방치 PR ({stalePRs.length})
+          </h2>
+          <div className="space-y-0">
+            {stalePRs.map((pr) => {
+              const waitingHours = Math.floor(
+                (now.getTime() - pr.createdAt.getTime()) / (60 * 60 * 1000)
+              );
+              return (
+                <a
+                  key={pr.id}
+                  href={`https://github.com/${pr.repository.fullName}/pull/${pr.number}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between px-3 py-2.5 -mx-3 rounded-md hover:bg-gray-800/40 transition-all duration-200 group"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <GitPullRequest className="w-4 h-4 text-amber-400 shrink-0" />
+                    {pr.author.avatarUrl && (
+                      <img
+                        src={pr.author.avatarUrl}
+                        alt={pr.author.login}
+                        className="w-5 h-5 rounded-full shrink-0"
+                      />
+                    )}
+                    <span className="text-[13px] text-white truncate group-hover:text-indigo-400 transition-colors">
+                      {pr.title}
+                    </span>
+                    <span className="text-[11px] text-gray-600 shrink-0">
+                      #{pr.number}
+                    </span>
+                  </div>
+                  <div className="text-[13px] text-amber-400/80 tabular-nums shrink-0 ml-4">
+                    {waitingHours}시간 대기
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Top Reviewers */}
       {topReviewers.length > 0 && (
-        <div>
+        <div className="mb-8">
           <h2 className="text-sm font-medium text-gray-300 mb-3">Top 리뷰어 (최근 30일)</h2>
           <div className="space-y-0">
             {topReviewers.map((reviewer) => (
@@ -170,6 +244,44 @@ export default async function OrgDashboardPage({ params }: Props) {
                   · {reviewer.reviewCount}건
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Activity */}
+      {recentMerged.length > 0 && (
+        <div>
+          <h2 className="text-sm font-medium text-gray-300 mb-3">최근 머지된 PR</h2>
+          <div className="space-y-0">
+            {recentMerged.map((pr) => (
+              <a
+                key={pr.id}
+                href={`https://github.com/${pr.repository.fullName}/pull/${pr.number}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between px-3 py-2.5 -mx-3 rounded-md hover:bg-gray-800/40 transition-all duration-200 group"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <GitPullRequest className="w-4 h-4 text-purple-400 shrink-0" />
+                  {pr.author.avatarUrl && (
+                    <img
+                      src={pr.author.avatarUrl}
+                      alt={pr.author.login}
+                      className="w-5 h-5 rounded-full shrink-0"
+                    />
+                  )}
+                  <span className="text-[13px] text-white truncate group-hover:text-indigo-400 transition-colors">
+                    {pr.title}
+                  </span>
+                  <span className="text-[11px] text-gray-600 shrink-0">
+                    {pr.repository.name}
+                  </span>
+                </div>
+                <div className="text-[13px] text-gray-500 tabular-nums shrink-0 ml-4">
+                  {pr.mergedAt ? formatRelativeTime(pr.mergedAt) : ""}
+                </div>
+              </a>
             ))}
           </div>
         </div>
