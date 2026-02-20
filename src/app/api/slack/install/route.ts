@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.SLACK_CLIENT_ID!;
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/slack/install/callback`;
-  const scopes = "chat:write,commands,channels:read,users:read";
+  const scopes = "chat:write,channels:join,commands,channels:read,users:read";
 
   const installationId = req.nextUrl.searchParams.get("installationId");
 
