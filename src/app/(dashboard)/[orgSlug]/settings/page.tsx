@@ -121,9 +121,17 @@ export default async function SettingsPage({ params }: Props) {
                   currentChannelName={slack.channelName}
                 />
               </div>
-              {slack.channelId && (
-                <TestMessageButton installationId={installation.id} />
-              )}
+              <div className="flex items-center gap-2">
+                {slack.channelId && (
+                  <TestMessageButton installationId={installation.id} />
+                )}
+                <a
+                  href={`/api/slack/install?installationId=${installation.id}`}
+                  className="inline-flex items-center rounded-md px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-300 transition-colors duration-200"
+                >
+                  권한 재승인
+                </a>
+              </div>
             </div>
           ) : (
             <div>
