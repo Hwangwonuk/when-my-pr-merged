@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ScrollReveal } from "@/components/landing/scroll-reveal";
 import { FeatureLines } from "@/components/landing/feature-lines";
 import { SlackMock } from "@/components/landing/slack-mock";
-import { DashboardPreview } from "@/components/landing/dashboard-preview";
+import { FeatureShowcase } from "@/components/landing/feature-showcase";
 
 export default async function LoginPage() {
   const user = await getCurrentUser();
@@ -104,108 +104,19 @@ export default async function LoginPage() {
           </ScrollReveal>
         </section>
 
-        {/* S4. 기능 소개 — 구체화 */}
+        {/* S4. 기능 소개 — 스토리 */}
         <section className="py-32 px-6 md:px-12 max-w-7xl mx-auto">
           <ScrollReveal>
-            <p className="font-mono text-xs text-gray-500 uppercase tracking-widest mb-4">
+            <p className="font-mono text-xs text-gray-500 uppercase tracking-widest mb-16">
               Features
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold mb-16">
-              팀의 PR 흐름을<br />
-              한눈에 볼 수 있습니다
-            </h2>
           </ScrollReveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10">
-            {[
-              {
-                icon: "📊",
-                title: "실시간 대시보드",
-                desc: "총 PR 수, 평균 머지 시간, 첫 리뷰 시간,\n머지율을 한 화면에서 확인할 수 있습니다.\n이전 기간 대비 추세도 자동으로 계산됩니다.",
-              },
-              {
-                icon: "👥",
-                title: "리뷰어 랭킹",
-                desc: "누가 빠르게, 얼마나 자주 리뷰하는지\n응답 시간·리뷰 수·승인율로 순위를 매깁니다.\n팀 내 리뷰 문화를 데이터로 확인할 수 있습니다.",
-              },
-              {
-                icon: "🔮",
-                title: "머지 예측",
-                desc: "오픈된 PR이 언제쯤 머지될지\n과거 패턴을 기반으로 예측합니다.\n신뢰도(높음/보통/낮음)도 함께 표시됩니다.",
-              },
-              {
-                icon: "🔍",
-                title: "병목 분석",
-                desc: "PR 오픈 → 첫 리뷰 → 승인 → 머지,\n각 단계별 소요 시간을 분석합니다.\n어디서 시간이 걸리는지 바로 파악할 수 있습니다.",
-              },
-              {
-                icon: "📅",
-                title: "시간대·요일 패턴",
-                desc: "몇 시에 올린 PR이 가장 빨리 머지되는지,\n어떤 요일이 리뷰에 유리한지 알 수 있습니다.\n팀의 리뷰 리듬을 데이터로 파악할 수 있습니다.",
-              },
-              {
-                icon: "📏",
-                title: "PR 크기별 분석",
-                desc: "S, M, L, XL 크기별 평균 머지 시간을\n비교해서 보여줍니다.\n작은 PR이 빠르다는 걸 데이터로 증명합니다.",
-              },
-              {
-                icon: "🏆",
-                title: "리더보드 & 배지",
-                desc: "리뷰어·PR 작성자 리더보드와\n매주 자동으로 수여되는 배지 시스템입니다.\n팀 내 건전한 경쟁을 유도합니다.",
-              },
-              {
-                icon: "⚡",
-                title: "컨플릭트 패턴",
-                desc: "컨플릭트가 자주 발생하는 요일과\nPR 크기를 분석합니다.\n문제가 되기 전에 패턴을 인식할 수 있습니다.",
-              },
-              {
-                icon: "📈",
-                title: "월간 리포트",
-                desc: "매월 PR 수, 머지 시간, 첫 리뷰 시간의\n변화를 자동으로 추적합니다.\n전월 대비 개선 여부를 바로 확인할 수 있습니다.",
-              },
-            ].map((feature, i) => (
-              <ScrollReveal key={feature.title} delay={i % 3 * 100}>
-                <div className="group">
-                  <span className="text-2xl mb-3 block">{feature.icon}</span>
-                  <h3 className="text-base font-semibold text-white mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">
-                    {feature.desc}
-                  </p>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
+          <ScrollReveal delay={100}>
+            <FeatureShowcase />
+          </ScrollReveal>
         </section>
 
-        {/* S5. 대시보드 미리보기 */}
-        <section className="py-32 px-6 md:px-12 max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
-            <ScrollReveal direction="left">
-              <div>
-                <p className="font-mono text-xs text-gray-500 uppercase tracking-widest mb-6">
-                  Dashboard
-                </p>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                  설치하면<br />
-                  이런 화면을 볼 수 있습니다
-                </h2>
-                <p className="text-gray-500 leading-relaxed">
-                  PR 현황, 리뷰어 순위, 시간대별 패턴까지<br />
-                  모든 데이터가 하나의 대시보드에 정리됩니다.<br />
-                  <br />
-                  탭을 눌러서 미리 확인해 보세요.
-                </p>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal direction="right" delay={200}>
-              <DashboardPreview />
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* S6. 작동 방식 — 신뢰 */}
+        {/* S5. 작동 방식 — 신뢰 */}
         <section className="py-32 px-6 md:px-12 max-w-7xl mx-auto">
           <ScrollReveal>
             <p className="font-mono text-xs text-gray-500 uppercase tracking-widest mb-16">
@@ -245,7 +156,7 @@ export default async function LoginPage() {
           </div>
         </section>
 
-        {/* S7. Slack — 신뢰 보강 */}
+        {/* S6. Slack — 신뢰 보강 */}
         <section className="py-32 px-6 md:px-12 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
             <ScrollReveal direction="left">
@@ -272,7 +183,7 @@ export default async function LoginPage() {
           </div>
         </section>
 
-        {/* S8. 시작 — 행동 */}
+        {/* S7. 시작 — 행동 */}
         <section className="py-32 px-6 md:px-12 max-w-7xl mx-auto">
           <ScrollReveal>
             <div className="max-w-3xl">
