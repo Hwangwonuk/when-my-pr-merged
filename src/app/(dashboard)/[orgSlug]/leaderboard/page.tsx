@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { getReviewerRankings } from "@/lib/stats/reviewer-ranking";
 import { EmptyState } from "@/components/shared/empty-state";
+import { RankBadge } from "@/components/shared/rank-badge";
 import { formatDuration } from "@/lib/utils/format";
+import { Trophy } from "lucide-react";
 import { subDays } from "date-fns";
 
 interface Props {
@@ -22,7 +24,7 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
       <div>
         <h1 className="text-2xl font-bold mb-8">팀 리더보드</h1>
         <EmptyState
-          icon="🏆"
+          icon={<Trophy className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
           description="리더보드를 보려면 먼저 GitHub App을 설치해주세요."
         />
@@ -120,7 +122,7 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
 
       {rankings.length === 0 && authorStats.length === 0 ? (
         <EmptyState
-          icon="🏆"
+          icon={<Trophy className="w-12 h-12" />}
           title="리더보드 데이터가 없습니다"
           description="이 기간에 리뷰 활동이 없습니다. 기간을 변경하거나 데이터가 쌓이기를 기다려주세요."
         />
@@ -132,7 +134,6 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
               <h2 className="text-lg font-semibold mb-4">리뷰어 리더보드</h2>
               <div className="space-y-3">
                 {rankings.slice(0, 10).map((reviewer) => {
-                  const medals = ["🥇", "🥈", "🥉"];
                   const userBadgeList = badgesByUser.get(reviewer.user.id) ?? [];
 
                   return (
@@ -140,11 +141,7 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
                       key={reviewer.user.id}
                       className="flex items-center gap-4 rounded-lg bg-gray-700/20 px-4 py-3"
                     >
-                      <span className="text-lg w-8 text-center">
-                        {reviewer.rank <= 3
-                          ? medals[reviewer.rank - 1]
-                          : `${reviewer.rank}.`}
-                      </span>
+                      <RankBadge rank={reviewer.rank} size="md" />
                       {reviewer.user.avatarUrl && (
                         <img
                           src={reviewer.user.avatarUrl}
@@ -191,16 +188,13 @@ export default async function LeaderboardPage({ params, searchParams }: Props) {
                 {authorStats.map((stat, i) => {
                   const user = authorUserMap.get(stat.authorId);
                   if (!user) return null;
-                  const medals = ["🥇", "🥈", "🥉"];
 
                   return (
                     <div
                       key={stat.authorId}
                       className="flex items-center gap-4 rounded-lg bg-gray-700/20 px-4 py-3"
                     >
-                      <span className="text-lg w-8 text-center">
-                        {i < 3 ? medals[i] : `${i + 1}.`}
-                      </span>
+                      <RankBadge rank={i + 1} size="md" />
                       {user.avatarUrl && (
                         <img
                           src={user.avatarUrl}

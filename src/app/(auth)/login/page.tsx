@@ -1,27 +1,29 @@
 import { getCurrentUser } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
+import { BarChart3, Bell, Trophy, Search } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const features = [
+const features: { icon: LucideIcon; title: string; description: string }[] = [
   {
-    icon: "📊",
+    icon: BarChart3,
     title: "핵심 통계",
     description:
       "리뷰어별 응답 속도, 시간대별 머지 패턴, PR 크기별 머지 시간을 한눈에 파악하세요.",
   },
   {
-    icon: "🔔",
+    icon: Bell,
     title: "스마트 알림",
     description:
       "방치된 PR 리마인더, 머지 예측, Hot Streak 알림을 Slack으로 받으세요.",
   },
   {
-    icon: "🏆",
+    icon: Trophy,
     title: "리뷰왕 배지",
     description:
       "리뷰왕, 번개 리뷰어 등 배지 시스템으로 코드 리뷰를 재미있게!",
   },
   {
-    icon: "🔍",
+    icon: Search,
     title: "병목 분석",
     description:
       "첫 리뷰까지 시간, 승인 후 머지까지 시간 등 병목 지점을 찾아드립니다.",
@@ -100,16 +102,21 @@ export default async function LoginPage() {
         <section id="features" className="py-24">
           <h3 className="text-3xl font-bold text-center mb-12">주요 기능</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="rounded-xl bg-gray-800/30 border border-gray-700/50 p-8"
-              >
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h4 className="text-xl font-semibold mb-2">{feature.title}</h4>
-                <p className="text-gray-400">{feature.description}</p>
-              </div>
-            ))}
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={feature.title}
+                  className="rounded-xl bg-gray-800/30 border border-gray-700/50 p-8"
+                >
+                  <div className="mb-4 text-indigo-400">
+                    <Icon className="w-8 h-8" />
+                  </div>
+                  <h4 className="text-xl font-semibold mb-2">{feature.title}</h4>
+                  <p className="text-gray-400">{feature.description}</p>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -131,7 +138,7 @@ export default async function LoginPage() {
                 key={insight}
                 className="rounded-lg bg-gray-800/50 border border-gray-700/50 px-6 py-4 text-gray-300"
               >
-                &ldquo;{insight}&rdquo;
+                "{insight}"
               </div>
             ))}
           </div>

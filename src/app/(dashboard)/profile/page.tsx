@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { EmptyState } from "@/components/shared/empty-state";
+import { UserCircle } from "lucide-react";
 import { formatDuration, formatPercentage, formatNumber } from "@/lib/utils/format";
 import { subDays } from "date-fns";
 
@@ -116,7 +117,7 @@ export default async function ProfilePage() {
 
       {authoredPRs.length === 0 && reviews.length === 0 ? (
         <EmptyState
-          icon="📊"
+          icon={<UserCircle className="w-12 h-12" />}
           title="아직 활동 데이터가 없습니다"
           description="최근 30일간의 PR 및 리뷰 활동이 표시됩니다."
         />

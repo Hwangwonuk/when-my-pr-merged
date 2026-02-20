@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getReviewerRankings } from "@/lib/stats/reviewer-ranking";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Users } from "lucide-react";
 import { ReviewerRankingTable } from "@/components/dashboard/reviewer-ranking-table";
 import { ReviewerSpeedChart } from "@/components/charts/reviewer-speed-chart";
 import { subDays } from "date-fns";
@@ -23,7 +24,7 @@ export default async function ReviewersPage({ params, searchParams }: Props) {
       <div>
         <h1 className="text-2xl font-bold mb-8">리뷰어 랭킹</h1>
         <EmptyState
-          icon="👥"
+          icon={<Users className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
           description="리뷰어 데이터를 보려면 먼저 GitHub App을 설치해주세요."
         />
@@ -69,7 +70,7 @@ export default async function ReviewersPage({ params, searchParams }: Props) {
 
       {rankings.length === 0 ? (
         <EmptyState
-          icon="👥"
+          icon={<Users className="w-12 h-12" />}
           title="리뷰어 데이터가 없습니다"
           description="이 기간에 리뷰 활동이 없습니다. 기간을 변경하거나 PR 리뷰가 쌓이기를 기다려주세요."
         />

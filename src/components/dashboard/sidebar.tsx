@@ -4,6 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
+import {
+  LayoutDashboard,
+  BarChart3,
+  Users,
+  Lightbulb,
+  Trophy,
+  FileText,
+  Settings,
+  ArrowLeftRight,
+  LogOut,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface SidebarProps {
   user: {
@@ -12,14 +24,14 @@ interface SidebarProps {
   };
 }
 
-const navItems = [
-  { href: "", label: "개요", icon: "📊" },
-  { href: "/stats", label: "통계", icon: "📈" },
-  { href: "/reviewers", label: "리뷰어 랭킹", icon: "👥" },
-  { href: "/insights", label: "인사이트", icon: "🔍" },
-  { href: "/leaderboard", label: "리더보드", icon: "🏆" },
-  { href: "/reports", label: "리포트", icon: "📋" },
-  { href: "/settings", label: "설정", icon: "⚙️" },
+const navItems: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "", label: "개요", icon: LayoutDashboard },
+  { href: "/stats", label: "통계", icon: BarChart3 },
+  { href: "/reviewers", label: "리뷰어 랭킹", icon: Users },
+  { href: "/insights", label: "인사이트", icon: Lightbulb },
+  { href: "/leaderboard", label: "리더보드", icon: Trophy },
+  { href: "/reports", label: "리포트", icon: FileText },
+  { href: "/settings", label: "설정", icon: Settings },
 ];
 
 export function Sidebar({ user }: SidebarProps) {
@@ -54,6 +66,7 @@ export function Sidebar({ user }: SidebarProps) {
               item.href === ""
                 ? pathname === `/${orgSlug}`
                 : pathname.startsWith(fullHref);
+            const Icon = item.icon;
 
             return (
               <Link
@@ -67,7 +80,7 @@ export function Sidebar({ user }: SidebarProps) {
                     : "text-gray-400 hover:text-white hover:bg-gray-800"
                 )}
               >
-                <span>{item.icon}</span>
+                <Icon className="w-4 h-4" />
                 <span>{item.label}</span>
               </Link>
             );
@@ -86,7 +99,7 @@ export function Sidebar({ user }: SidebarProps) {
           onClick={() => setMobileOpen(false)}
           className="flex items-center gap-3 px-2 py-2 rounded-lg text-xs text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition-colors"
         >
-          <span>🔄</span>
+          <ArrowLeftRight className="w-4 h-4" />
           <span>조직 전환</span>
         </Link>
         <Link
@@ -110,7 +123,7 @@ export function Sidebar({ user }: SidebarProps) {
           }}
           className="flex items-center gap-3 px-2 py-2 rounded-lg text-xs text-gray-500 hover:text-red-400 hover:bg-gray-800 transition-colors w-full"
         >
-          <span>🚪</span>
+          <LogOut className="w-4 h-4" />
           <span>로그아웃</span>
         </button>
       </div>

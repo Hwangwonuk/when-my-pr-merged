@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getHourlyPatterns, getDailyPatterns, getSizeAnalysis } from "@/lib/stats/patterns";
 import { EmptyState } from "@/components/shared/empty-state";
+import { BarChart3 } from "lucide-react";
 import { HourlyHeatmap } from "@/components/charts/hourly-heatmap";
 import { MergeTimeByDayChart } from "@/components/charts/merge-time-chart";
 import { PrSizeChart } from "@/components/charts/pr-size-chart";
@@ -24,7 +25,7 @@ export default async function StatsPage({ params, searchParams }: Props) {
       <div>
         <h1 className="text-2xl font-bold mb-8">핵심 통계</h1>
         <EmptyState
-          icon="📊"
+          icon={<BarChart3 className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
           description="통계를 보려면 먼저 GitHub App을 설치해주세요."
         />
@@ -58,7 +59,7 @@ export default async function StatsPage({ params, searchParams }: Props) {
       <div>
         <h1 className="text-2xl font-bold mb-8">핵심 통계</h1>
         <EmptyState
-          icon="📊"
+          icon={<BarChart3 className="w-12 h-12" />}
           title="통계 데이터를 준비 중입니다"
           description="PR 데이터가 충분히 수집되면 시간대별, 요일별, PR 크기별 통계를 확인할 수 있습니다."
         />

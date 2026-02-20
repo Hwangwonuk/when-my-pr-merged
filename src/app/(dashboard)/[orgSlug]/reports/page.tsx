@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getOverviewStats } from "@/lib/stats/calculator";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FileText } from "lucide-react";
 import { formatDuration, formatPercentage, formatNumber } from "@/lib/utils/format";
 import { subDays, subMonths, format, startOfMonth, endOfMonth } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -21,7 +22,7 @@ export default async function ReportsPage({ params }: Props) {
       <div>
         <h1 className="text-2xl font-bold mb-8">리포트</h1>
         <EmptyState
-          icon="📋"
+          icon={<FileText className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
           description="리포트를 보려면 먼저 GitHub App을 설치해주세요."
         />
@@ -58,7 +59,7 @@ export default async function ReportsPage({ params }: Props) {
       <div>
         <h1 className="text-2xl font-bold mb-8">리포트</h1>
         <EmptyState
-          icon="📋"
+          icon={<FileText className="w-12 h-12" />}
           title="리포트를 생성 중입니다"
           description="PR 데이터가 충분히 수집되면 월간 리포트를 확인할 수 있습니다."
         />

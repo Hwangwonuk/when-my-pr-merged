@@ -5,8 +5,10 @@ import { getMergePrediction } from "@/lib/stats/predictions";
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { PredictionWidget } from "@/components/dashboard/prediction-widget";
 import { EmptyState } from "@/components/shared/empty-state";
+import { RankBadge } from "@/components/shared/rank-badge";
 import { formatDuration, formatPercentage, formatNumber } from "@/lib/utils/format";
 import { subDays } from "date-fns";
+import { Link2, Rocket } from "lucide-react";
 
 interface Props {
   params: Promise<{ orgSlug: string }>;
@@ -67,7 +69,7 @@ export default async function OrgDashboardPage({ params }: Props) {
       <div>
         <h1 className="text-2xl font-bold mb-8">{orgSlug}</h1>
         <EmptyState
-          icon="🔗"
+          icon={<Link2 className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
           description="이 조직에 GitHub App을 설치해야 PR 데이터를 수집할 수 있습니다."
         />
@@ -100,7 +102,7 @@ export default async function OrgDashboardPage({ params }: Props) {
           <StatsCard title="머지율" value="--" subtitle="데이터 없음" />
         </div>
         <EmptyState
-          icon="🚀"
+          icon={<Rocket className="w-12 h-12" />}
           title="데이터를 수집하고 있습니다"
           description="GitHub App이 설치되었습니다! PR이 생성되면 자동으로 통계가 표시됩니다."
         />
@@ -118,22 +120,26 @@ export default async function OrgDashboardPage({ params }: Props) {
           title="총 PR 수"
           value={formatNumber(overview.totalPRs)}
           subtitle={`머지: ${overview.mergedPRs} / 오픈: ${overview.openPRs}`}
+          color="sky"
         />
         <StatsCard
           title="평균 머지 시간"
           value={formatDuration(overview.avgTimeToMergeMs)}
           subtitle={`중앙값: ${formatDuration(overview.medianTimeToMergeMs)}`}
           trend={overview.trend.timeToMerge}
+          color="amber"
         />
         <StatsCard
           title="평균 첫 리뷰 시간"
           value={formatDuration(overview.avgTimeToFirstReviewMs)}
           trend={overview.trend.timeToFirstReview}
+          color="rose"
         />
         <StatsCard
           title="머지율"
           value={formatPercentage(overview.mergeRate, 0)}
           subtitle={`평균 ${overview.avgRevisionCount.toFixed(1)}회 수정 후 머지`}
+          color="emerald"
         />
       </div>
 
@@ -151,11 +157,7 @@ export default async function OrgDashboardPage({ params }: Props) {
                 className="flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-500 w-6">
-                    {reviewer.rank <= 3
-                      ? ["🥇", "🥈", "🥉"][reviewer.rank - 1]
-                      : `${reviewer.rank}.`}
-                  </span>
+                  <RankBadge rank={reviewer.rank} />
                   {reviewer.user.avatarUrl && (
                     <img
                       src={reviewer.user.avatarUrl}

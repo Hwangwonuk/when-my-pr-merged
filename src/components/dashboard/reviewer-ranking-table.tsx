@@ -1,6 +1,7 @@
 "use client";
 
 import { formatDuration, formatPercentage } from "@/lib/utils/format";
+import { RankBadge } from "@/components/shared/rank-badge";
 import type { ReviewerRanking } from "@/types";
 
 interface ReviewerRankingTableProps {
@@ -27,8 +28,8 @@ export function ReviewerRankingTable({ rankings }: ReviewerRankingTableProps) {
               key={reviewer.user.id}
               className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors"
             >
-              <td className="px-4 py-3 text-gray-300 font-medium">
-                {reviewer.rank <= 3 ? ["🥇", "🥈", "🥉"][reviewer.rank - 1] : reviewer.rank}
+              <td className="px-4 py-3">
+                <RankBadge rank={reviewer.rank} />
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">

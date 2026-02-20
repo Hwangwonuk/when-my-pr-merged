@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Link2 } from "lucide-react";
 
 export default async function DashboardRootPage() {
   const user = await getCurrentUser();
@@ -69,7 +70,9 @@ export default async function DashboardRootPage() {
 
       {memberships.length === 0 ? (
         <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-8 text-center">
-          <div className="text-5xl mb-4">🔗</div>
+          <div className="mb-4 flex justify-center text-gray-500">
+            <Link2 className="w-12 h-12" />
+          </div>
           <h2 className="text-xl font-semibold mb-2">
             GitHub App을 설치해주세요
           </h2>

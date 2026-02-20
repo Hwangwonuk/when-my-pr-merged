@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Settings } from "lucide-react";
 import { ChannelSelector } from "@/components/dashboard/channel-selector";
 import { NotificationToggle } from "@/components/dashboard/notification-toggle";
 
@@ -27,7 +28,7 @@ export default async function SettingsPage({ params }: Props) {
       <div>
         <h1 className="text-2xl font-bold mb-8">설정</h1>
         <EmptyState
-          icon="⚙️"
+          icon={<Settings className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
           description="설정을 변경하려면 먼저 GitHub App을 설치해주세요."
         />

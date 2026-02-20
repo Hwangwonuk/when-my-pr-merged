@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getBottleneckAnalysis } from "@/lib/stats/patterns";
 import { getConflictPatterns } from "@/lib/stats/conflict-patterns";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Lightbulb, AlertTriangle } from "lucide-react";
 import { BottleneckAnalysisView } from "@/components/dashboard/bottleneck-analysis";
 import { formatDuration, formatPercentage, getDayNameKo } from "@/lib/utils/format";
 import { subDays } from "date-fns";
@@ -24,7 +25,7 @@ export default async function InsightsPage({ params, searchParams }: Props) {
       <div>
         <h1 className="text-2xl font-bold mb-8">인사이트</h1>
         <EmptyState
-          icon="🔍"
+          icon={<Lightbulb className="w-12 h-12" />}
           title="GitHub App이 설치되지 않았습니다"
           description="인사이트를 보려면 먼저 GitHub App을 설치해주세요."
         />
@@ -96,7 +97,7 @@ export default async function InsightsPage({ params, searchParams }: Props) {
 
       {!hasData ? (
         <EmptyState
-          icon="🔍"
+          icon={<Lightbulb className="w-12 h-12" />}
           title="인사이트를 분석 중입니다"
           description="충분한 데이터가 수집되면 병목 지점 분석과 재작업 통계를 확인할 수 있습니다."
         />
@@ -131,14 +132,15 @@ export default async function InsightsPage({ params, searchParams }: Props) {
             <h3 className="text-lg font-semibold mb-4">핵심 인사이트</h3>
             <div className="space-y-3">
               <div className="rounded-lg bg-gray-700/30 px-4 py-3 text-sm text-gray-300">
-                &ldquo;첫 리뷰까지 평균 {formatDuration(bottleneck.avgTimeToFirstReviewMs)} vs 승인 후 머지까지 {formatDuration(bottleneck.avgApprovalToMergeMs)}&rdquo;
+                "첫 리뷰까지 평균 {formatDuration(bottleneck.avgTimeToFirstReviewMs)} vs 승인 후 머지까지 {formatDuration(bottleneck.avgApprovalToMergeMs)}"
               </div>
               <div className="rounded-lg bg-gray-700/30 px-4 py-3 text-sm text-gray-300">
-                &ldquo;평균 {avgRevisionCount.toFixed(1)}회 수정 후 머지&rdquo;
+                "평균 {avgRevisionCount.toFixed(1)}회 수정 후 머지"
               </div>
               {bottleneck.avgTimeToFirstReviewMs > bottleneck.avgFirstReviewToApprovalMs + bottleneck.avgApprovalToMergeMs && (
-                <div className="rounded-lg bg-amber-900/20 border border-amber-700/30 px-4 py-3 text-sm text-amber-300">
-                  ⚠️ 첫 리뷰까지의 대기 시간이 가장 큰 병목입니다. 리뷰 요청 후 빠른 응답을 독려해보세요.
+                <div className="flex items-start gap-2 rounded-lg bg-amber-900/20 border border-amber-700/30 px-4 py-3 text-sm text-amber-300">
+                  <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span>첫 리뷰까지의 대기 시간이 가장 큰 병목입니다. 리뷰 요청 후 빠른 응답을 독려해보세요.</span>
                 </div>
               )}
             </div>
@@ -240,9 +242,10 @@ export default async function InsightsPage({ params, searchParams }: Props) {
 
               {/* Insights */}
               {conflictPatterns.conflictRate > 0.2 && (
-                <div className="mt-4 rounded-lg bg-amber-900/20 border border-amber-700/30 px-4 py-3 text-sm text-amber-300">
-                  ⚠️ 컨플릭트 발생률이 {formatPercentage(conflictPatterns.conflictRate * 100)}로 높습니다.
-                  PR을 더 작게 나누고, 베이스 브랜치를 자주 리베이스하는 것을 권장합니다.
+                <div className="mt-4 flex items-start gap-2 rounded-lg bg-amber-900/20 border border-amber-700/30 px-4 py-3 text-sm text-amber-300">
+                  <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span>컨플릭트 발생률이 {formatPercentage(conflictPatterns.conflictRate * 100)}로 높습니다.
+                  PR을 더 작게 나누고, 베이스 브랜치를 자주 리베이스하는 것을 권장합니다.</span>
                 </div>
               )}
               {(() => {
