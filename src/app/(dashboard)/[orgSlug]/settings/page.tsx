@@ -4,6 +4,7 @@ import { Settings } from "lucide-react";
 import { ChannelSelector } from "@/components/dashboard/channel-selector";
 import { NotificationToggle } from "@/components/dashboard/notification-toggle";
 import { TestMessageButton } from "@/components/dashboard/test-message-button";
+import { SlackDisconnectButton } from "@/components/dashboard/slack-disconnect-button";
 
 interface Props {
   params: Promise<{ orgSlug: string }>;
@@ -125,12 +126,7 @@ export default async function SettingsPage({ params }: Props) {
                 {slack.channelId && (
                   <TestMessageButton installationId={installation.id} />
                 )}
-                <a
-                  href={`/api/slack/install?installationId=${installation.id}`}
-                  className="inline-flex items-center rounded-md px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-300 transition-colors duration-200"
-                >
-                  권한 재승인
-                </a>
+                <SlackDisconnectButton installationId={installation.id} />
               </div>
             </div>
           ) : (
