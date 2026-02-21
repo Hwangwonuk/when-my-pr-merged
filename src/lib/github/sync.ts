@@ -47,6 +47,7 @@ export async function syncHistoricalData(
       where: { id: installationId },
       data: { syncStatus: "failed" },
     });
+    throw err;
   }
 }
 
