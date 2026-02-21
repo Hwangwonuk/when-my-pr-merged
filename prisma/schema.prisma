@@ -53,7 +53,7 @@ model Repository {
 
 model User {
   id          String   @id @default(cuid())
-  githubId    Int      @unique @map("github_id")
+  githubId    BigInt   @unique @map("github_id")
   login       String   @unique
   name        String?
   avatarUrl   String?  @map("avatar_url")
@@ -91,7 +91,7 @@ model Member {
 
 model PullRequest {
   id           String  @id @default(cuid())
-  githubId     Int     @unique @map("github_id")
+  githubId     BigInt  @unique @map("github_id")
   number       Int
   title        String
   state        String // "open" | "closed" | "merged"
@@ -138,7 +138,7 @@ model PullRequest {
 
 model Review {
   id            String   @id @default(cuid())
-  githubId      Int      @unique @map("github_id")
+  githubId      BigInt   @unique @map("github_id")
   pullRequestId String   @map("pull_request_id")
   reviewerId    String   @map("reviewer_id")
   state         String // "APPROVED" | "CHANGES_REQUESTED" | "COMMENTED" | "DISMISSED"
