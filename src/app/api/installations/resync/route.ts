@@ -4,6 +4,8 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { syncHistoricalData } from "@/lib/github/sync";
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
