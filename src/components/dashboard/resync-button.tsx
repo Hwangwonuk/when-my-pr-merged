@@ -23,6 +23,7 @@ export function ResyncButton({ installationId }: ResyncButtonProps) {
       });
 
       if (res.ok) {
+        setStatus("idle");
         router.refresh();
       } else {
         const data = await res.json().catch(() => null);
