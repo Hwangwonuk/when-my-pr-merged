@@ -68,7 +68,7 @@ export default async function InsightsPage({ params, searchParams }: Props) {
       ? mergedPRs.reduce((sum, pr) => sum + pr.reviewCycleCount, 0) / mergedPRs.length
       : 0;
 
-  const hasData = bottleneck.avgTotalMs > 0;
+  const hasData = bottleneck.avgTotalMs > 0 || mergedPRs.length > 0;
 
   return (
     <div>

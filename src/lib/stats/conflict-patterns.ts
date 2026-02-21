@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getDayNameKo, getPrSizeBucket } from "@/lib/utils/format";
+import { getDayNameKo, getPrSizeBucket, getHourKST, getDayOfWeekKST } from "@/lib/utils/format";
 import type { ConflictPatternAnalysis, DateRangeParams } from "@/types";
 
 export async function getConflictPatterns(
@@ -51,7 +51,7 @@ export async function getConflictPatterns(
   for (let d = 0; d < 7; d++) dayBuckets.set(d, { conflict: 0, total: 0 });
 
   for (const pr of prs) {
-    const day = pr.createdAt.getDay();
+    const day = getDayOfWeekKST(pr.createdAt);
     const bucket = dayBuckets.get(day)!;
     bucket.total++;
     if (pr.hasConflict) bucket.conflict++;
@@ -70,7 +70,7 @@ export async function getConflictPatterns(
   for (let h = 0; h < 24; h++) hourBuckets.set(h, { conflict: 0, total: 0 });
 
   for (const pr of prs) {
-    const hour = pr.createdAt.getHours();
+    const hour = getHourKST(pr.createdAt);
     const bucket = hourBuckets.get(hour)!;
     bucket.total++;
     if (pr.hasConflict) bucket.conflict++;

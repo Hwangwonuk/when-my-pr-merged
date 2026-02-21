@@ -38,7 +38,7 @@ export function BottleneckAnalysisView({ data }: BottleneckAnalysisProps) {
             <div className="flex justify-between items-center mb-1">
               <span className="text-xs text-gray-400">{stage.label}</span>
               <span className="text-xs font-medium tabular-nums text-white">
-                {formatDuration(stage.duration)}
+                {stage.duration > 0 ? formatDuration(stage.duration) : "-"}
               </span>
             </div>
             <div className="w-full bg-gray-800/50 rounded-full h-2">

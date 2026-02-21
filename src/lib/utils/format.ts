@@ -48,6 +48,28 @@ export function getPrSizeLabel(additions: number, deletions: number): string {
   return "XL (500줄+)";
 }
 
+export function getHourKST(date: Date): number {
+  return parseInt(
+    new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: "Asia/Seoul",
+    }).format(date),
+    10
+  );
+}
+
+export function getDayOfWeekKST(date: Date): number {
+  const dayStr = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    timeZone: "Asia/Seoul",
+  }).format(date);
+  const dayMap: Record<string, number> = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+  };
+  return dayMap[dayStr] ?? 0;
+}
+
 export function getPrSizeBucket(additions: number, deletions: number): "S" | "M" | "L" | "XL" {
   const total = additions + deletions;
   if (total <= 100) return "S";

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { subDays, addMilliseconds, getDay, getHours } from "date-fns";
+import { subDays, addMilliseconds } from "date-fns";
+import { getHourKST, getDayOfWeekKST } from "@/lib/utils/format";
 import type { MergePrediction } from "@/types";
 
 interface PredictionParams {
@@ -37,8 +38,8 @@ export async function getMergePrediction(
   const now = new Date();
   const ninetyDaysAgo = subDays(now, 90);
   const createdAt = pr.createdAt;
-  const dayOfWeek = getDay(createdAt);
-  const hourOfDay = getHours(createdAt);
+  const dayOfWeek = getDayOfWeekKST(createdAt);
+  const hourOfDay = getHourKST(createdAt);
   const prSize = pr.additions + pr.deletions;
 
   // 1. 작성자 히스토리 (40%)
@@ -97,8 +98,8 @@ export async function getMergePrediction(
   });
 
   const timeFiltered = timePRs.filter((p) => {
-    const d = getDay(p.createdAt);
-    const h = getHours(p.createdAt);
+    const d = getDayOfWeekKST(p.createdAt);
+    const h = getHourKST(p.createdAt);
     return d === dayOfWeek && Math.abs(h - hourOfDay) <= 2;
   });
 

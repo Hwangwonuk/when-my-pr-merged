@@ -6,6 +6,8 @@ import {
   formatRelativeTime,
   getDayNameKo,
   getPrSizeBucket,
+  getHourKST,
+  getDayOfWeekKST,
 } from "@/lib/utils/format";
 
 describe("formatDuration", () => {
@@ -81,6 +83,37 @@ describe("getPrSizeBucket", () => {
 
   it("returns XL for extra large PRs", () => {
     expect(getPrSizeBucket(400, 200)).toBe("XL");
+  });
+});
+
+describe("getHourKST", () => {
+  it("converts UTC 00:00 to KST 9", () => {
+    const date = new Date("2025-01-15T00:00:00Z");
+    expect(getHourKST(date)).toBe(9);
+  });
+
+  it("converts UTC 15:00 to KST 0 (midnight)", () => {
+    const date = new Date("2025-01-15T15:00:00Z");
+    expect(getHourKST(date)).toBe(0);
+  });
+
+  it("converts UTC 05:00 to KST 14", () => {
+    const date = new Date("2025-01-15T05:00:00Z");
+    expect(getHourKST(date)).toBe(14);
+  });
+});
+
+describe("getDayOfWeekKST", () => {
+  it("returns correct day for KST", () => {
+    // 2025-01-15 is Wednesday
+    const date = new Date("2025-01-15T12:00:00Z");
+    expect(getDayOfWeekKST(date)).toBe(3); // Wed
+  });
+
+  it("handles date boundary crossing (Saturday UTC → Sunday KST)", () => {
+    // Saturday 2025-01-18 23:00 UTC = Sunday 2025-01-19 08:00 KST
+    const date = new Date("2025-01-18T23:00:00Z");
+    expect(getDayOfWeekKST(date)).toBe(0); // Sunday in KST
   });
 });
 

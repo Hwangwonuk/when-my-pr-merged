@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getDayNameKo, getPrSizeLabel, getPrSizeBucket } from "@/lib/utils/format";
+import { getDayNameKo, getPrSizeLabel, getPrSizeBucket, getHourKST, getDayOfWeekKST } from "@/lib/utils/format";
 import type {
   HourlyPattern,
   DailyPattern,
@@ -39,7 +39,7 @@ export async function getHourlyPatterns(params: DateRangeParams): Promise<Hourly
   for (let h = 0; h < 24; h++) hourlyBuckets.set(h, []);
 
   for (const pr of mergedPRs) {
-    const hour = pr.createdAt.getHours();
+    const hour = getHourKST(pr.createdAt);
     hourlyBuckets.get(hour)!.push(Number(pr.timeToMergeMs));
   }
 
@@ -73,7 +73,7 @@ export async function getDailyPatterns(params: DateRangeParams): Promise<DailyPa
   for (let d = 0; d < 7; d++) dailyBuckets.set(d, []);
 
   for (const pr of mergedPRs) {
-    const day = pr.createdAt.getDay();
+    const day = getDayOfWeekKST(pr.createdAt);
     dailyBuckets.get(day)!.push(Number(pr.timeToMergeMs));
   }
 
@@ -140,7 +140,6 @@ export async function getBottleneckAnalysis(params: DateRangeParams): Promise<Bo
         lte: new Date(to),
       },
       state: "merged",
-      timeToFirstReviewMs: { not: null },
     },
     select: {
       createdAt: true,

@@ -26,6 +26,17 @@ export function ReviewerSpeedChart({ data }: ReviewerSpeedChartProps) {
       reviewCount: r.reviewCount,
     }));
 
+  if (chartData.length === 0) {
+    return (
+      <div>
+        <h3 className="text-sm font-medium text-gray-300 mb-4">리뷰어 응답 속도 (Top 10)</h3>
+        <div className="flex items-center justify-center h-[300px] text-sm text-gray-500">
+          리뷰 요청(Review Request) 데이터가 수집되면 응답 속도를 확인할 수 있습니다.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h3 className="text-sm font-medium text-gray-300 mb-4">리뷰어 응답 속도 (Top 10)</h3>
