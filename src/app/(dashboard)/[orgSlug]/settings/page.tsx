@@ -83,10 +83,7 @@ export default async function SettingsPage({ params }: Props) {
                   status={installation.syncStatus}
                   syncedAt={installation.syncedAt}
                 />
-                <ResyncButton
-                  installationId={installation.id}
-                  syncStatus={installation.syncStatus}
-                />
+                <ResyncButton installationId={installation.id} />
               </div>
             </div>
           </div>
