@@ -11,7 +11,7 @@
 #   APP_URL    — 앱 URL (기본: https://when-my-pr-merged.vercel.app)
 #   ORG_SLUG   — 조직 슬러그 (필수)
 
-set -euo pipefail
+set -uo pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -39,9 +39,9 @@ PASS=0
 FAIL=0
 MANUAL=0
 
-pass() { echo -e "  ${GREEN}✓${NC} $1"; ((PASS++)); }
-fail() { echo -e "  ${RED}✗${NC} $1"; ((FAIL++)); }
-manual() { echo -e "  ${YELLOW}☐${NC} $1"; ((MANUAL++)); }
+pass() { echo -e "  ${GREEN}✓${NC} $1"; PASS=$((PASS+1)); }
+fail() { echo -e "  ${RED}✗${NC} $1"; FAIL=$((FAIL+1)); }
+manual() { echo -e "  ${YELLOW}☐${NC} $1"; MANUAL=$((MANUAL+1)); }
 info() { echo -e "  ${BLUE}ℹ${NC} $1"; }
 link() { echo -e "  ${DIM}$1${NC}"; }
 
@@ -139,7 +139,7 @@ echo ""
 echo -e "${BOLD}${CYAN}══════════════════════════════════════════════════════════${NC}"
 echo -e "  ${GREEN}자동 통과: $PASS${NC}"
 echo -e "  ${RED}자동 실패: $FAIL${NC}"
-echo -e "  ${YELLOW}수동 확인: $MANUAL개 항목${NC}"
+echo -e "  ${YELLOW}수동 확인: ${MANUAL}개 항목${NC}"
 echo -e "${BOLD}${CYAN}══════════════════════════════════════════════════════════${NC}"
 echo ""
 echo -e "  ${DIM}각 페이지를 브라우저에서 열어 위 항목들을 확인하세요.${NC}"
