@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  after(
+  after(() =>
     syncHistoricalData(installation.githubInstallId, installation.id).catch(
       (err) => console.error("Resync failed:", err)
     )

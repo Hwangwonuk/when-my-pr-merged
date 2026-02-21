@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         break;
       case "installation": {
         const syncPromise = await handleInstallationEvent(payload);
-        if (syncPromise) after(syncPromise);
+        if (syncPromise) after(() => syncPromise);
         break;
       }
       case "installation_repositories":
