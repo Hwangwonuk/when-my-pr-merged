@@ -31,10 +31,14 @@ export async function POST(req: NextRequest) {
   }
 
   if (installation.syncStatus === "syncing") {
-    return NextResponse.json(
-      { error: "이미 동기화가 진행 중입니다" },
-      { status: 409 }
-    );
+    const staleThreshold = 5 * 60 * 1000; // 5 minutes
+    const elapsed = Date.now() - installation.updatedAt.getTime();
+    if (elapsed < staleThreshold) {
+      return NextResponse.json(
+        { error: "이미 동기화가 진행 중입니다" },
+        { status: 409 }
+      );
+    }
   }
 
   after(
