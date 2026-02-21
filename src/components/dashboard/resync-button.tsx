@@ -31,7 +31,7 @@ export function ResyncButton({ installationId }: ResyncButtonProps) {
         setTimeout(() => {
           setStatus("idle");
           setErrorMessage(null);
-        }, 3000);
+        }, 5000);
       }
     } catch {
       setErrorMessage("네트워크 오류");

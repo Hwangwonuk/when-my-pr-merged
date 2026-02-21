@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { after } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { syncHistoricalData } from "@/lib/github/sync";
@@ -43,11 +42,14 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  after(() =>
-    syncHistoricalData(installation.githubInstallId, installation.id).catch(
-      (err) => console.error("Resync failed:", err)
-    )
-  );
-
-  return NextResponse.json({ ok: true });
+  try {
+    await syncHistoricalData(installation.githubInstallId, installation.id);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("Resync failed:", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "동기화 실패" },
+      { status: 500 }
+    );
+  }
 }
