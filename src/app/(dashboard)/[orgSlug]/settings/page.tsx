@@ -5,6 +5,7 @@ import { ChannelSelector } from "@/components/dashboard/channel-selector";
 import { NotificationToggle } from "@/components/dashboard/notification-toggle";
 import { TestMessageButton } from "@/components/dashboard/test-message-button";
 import { SlackDisconnectButton } from "@/components/dashboard/slack-disconnect-button";
+import { ResyncButton } from "@/components/dashboard/resync-button";
 
 interface Props {
   params: Promise<{ orgSlug: string }>;
@@ -77,10 +78,16 @@ export default async function SettingsPage({ params }: Props) {
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">데이터 동기화</p>
-              <SyncStatusBadge
-                status={installation.syncStatus}
-                syncedAt={installation.syncedAt}
-              />
+              <div className="flex items-center gap-2">
+                <SyncStatusBadge
+                  status={installation.syncStatus}
+                  syncedAt={installation.syncedAt}
+                />
+                <ResyncButton
+                  installationId={installation.id}
+                  syncStatus={installation.syncStatus}
+                />
+              </div>
             </div>
           </div>
 
