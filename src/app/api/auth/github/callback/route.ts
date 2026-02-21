@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
     // Create session and set cookie on redirect response
     const session = await getSession();
     session.userId = user.id;
-    session.githubId = user.githubId;
+    session.githubId = Number(user.githubId);
     session.login = user.login;
     session.avatarUrl = user.avatarUrl ?? undefined;
     session.accessToken = accessToken;
