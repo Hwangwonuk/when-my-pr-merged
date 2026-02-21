@@ -24,7 +24,7 @@ interface InstallationPayload {
   }>;
 }
 
-export async function handleInstallationEvent(payload: InstallationPayload) {
+export async function handleInstallationEvent(payload: InstallationPayload): Promise<Promise<void> | null> {
   const { action, installation: ghInstall } = payload;
 
   switch (action) {
@@ -99,11 +99,10 @@ export async function handleInstallationEvent(payload: InstallationPayload) {
         });
       }
 
-      // Trigger historical data sync (fire and forget)
-      syncHistoricalData(ghInstall.id, installation.id).catch((err) =>
+      // Return sync promise for caller to schedule via after()
+      return syncHistoricalData(ghInstall.id, installation.id).catch((err) =>
         console.error("Historical sync failed:", err)
       );
-      break;
     }
 
     case "deleted": {
@@ -129,6 +128,8 @@ export async function handleInstallationEvent(payload: InstallationPayload) {
       break;
     }
   }
+
+  return null;
 }
 
 interface InstallationRepositoriesPayload {

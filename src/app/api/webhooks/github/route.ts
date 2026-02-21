@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { verifyGitHubWebhook } from "@/lib/github/webhooks";
 import { handlePullRequestEvent } from "@/lib/github/handlers/pull-request";
 import { handlePullRequestReviewEvent } from "@/lib/github/handlers/pull-request-review";
@@ -39,9 +39,11 @@ export async function POST(req: NextRequest) {
       case "pull_request_review":
         await handlePullRequestReviewEvent(payload);
         break;
-      case "installation":
-        await handleInstallationEvent(payload);
+      case "installation": {
+        const syncPromise = await handleInstallationEvent(payload);
+        if (syncPromise) after(syncPromise);
         break;
+      }
       case "installation_repositories":
         await handleInstallationRepositoriesEvent(payload);
         break;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { syncHistoricalData } from "@/lib/github/sync";
@@ -36,9 +37,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Fire-and-forget: same pattern as installation handler
-  syncHistoricalData(installation.githubInstallId, installation.id).catch(
-    (err) => console.error("Resync failed:", err)
+  after(
+    syncHistoricalData(installation.githubInstallId, installation.id).catch(
+      (err) => console.error("Resync failed:", err)
+    )
   );
 
   return NextResponse.json({ ok: true });
