@@ -11,6 +11,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:pr": "bash scripts/e2e-pr-test.sh",
+    "test:e2e:prereq": "bash scripts/test-prerequisites.sh",
+    "test:e2e:verify": "bash scripts/verify-dashboard.sh",
+    "test:e2e:cleanup": "bash scripts/test-cleanup.sh",
     "setup:check": "npx tsx scripts/setup-check.ts"
   },
   "prisma": {
