@@ -34,7 +34,7 @@ model Installation {
 
 model Repository {
   id             String   @id @default(cuid())
-  githubId       Int      @unique @map("github_id")
+  githubId       BigInt   @unique @map("github_id")
   name           String
   fullName       String   @map("full_name")
   private        Boolean  @default(false)
