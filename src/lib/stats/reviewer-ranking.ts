@@ -24,12 +24,18 @@ export async function getReviewerRankings(
       reviewerId: true,
       state: true,
       responseTimeMs: true,
+      submittedAt: true,
       reviewer: {
         select: {
           id: true,
           login: true,
           avatarUrl: true,
           name: true,
+        },
+      },
+      pullRequest: {
+        select: {
+          createdAt: true,
         },
       },
     },
@@ -61,6 +67,12 @@ export async function getReviewerRankings(
     if (review.state === "APPROVED") entry.approvals++;
     if (review.responseTimeMs !== null) {
       entry.responseTimes.push(Number(review.responseTimeMs));
+    } else if (review.submittedAt && review.pullRequest.createdAt) {
+      // Fallback: use PR creation time as baseline
+      const fallback = review.submittedAt.getTime() - review.pullRequest.createdAt.getTime();
+      if (fallback > 0) {
+        entry.responseTimes.push(fallback);
+      }
     }
   }
 
