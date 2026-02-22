@@ -22,6 +22,17 @@ function verifySlackRequest(
   }
 }
 
+async function sendDeferredResponse(
+  responseUrl: string,
+  body: Record<string, unknown>
+) {
+  await fetch(responseUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const timestamp = req.headers.get("x-slack-request-timestamp") ?? "";
@@ -34,7 +45,7 @@ export async function POST(req: NextRequest) {
   const params = new URLSearchParams(body);
   const command = params.get("command");
   const teamId = params.get("team_id");
-  const text = params.get("text")?.trim() ?? "";
+  const responseUrl = params.get("response_url") ?? "";
 
   // 팀 ID로 installation 조회
   const slack = await prisma.slackIntegration.findFirst({
@@ -57,12 +68,21 @@ export async function POST(req: NextRequest) {
     to: now.toISOString(),
   };
 
+  // /pr-stale은 가벼운 쿼리라 즉시 응답, 나머지는 deferred response 사용
   switch (command) {
     case "/pr-stats":
-      return handlePrStats(dateParams, slack.installation.accountLogin);
+      handlePrStatsDeferred(dateParams, slack.installation.accountLogin, responseUrl);
+      return NextResponse.json({
+        response_type: "ephemeral",
+        text: ":hourglass_flowing_sand: PR 통계를 조회 중입니다...",
+      });
 
     case "/pr-leaderboard":
-      return handlePrLeaderboard(dateParams);
+      handlePrLeaderboardDeferred(dateParams, responseUrl);
+      return NextResponse.json({
+        response_type: "ephemeral",
+        text: ":hourglass_flowing_sand: 리더보드를 조회 중입니다...",
+      });
 
     case "/pr-stale":
       return handlePrStale(slack.installation.id);
@@ -75,99 +95,121 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handlePrStats(
+function handlePrStatsDeferred(
   dateParams: { installationId: string; from: string; to: string },
-  orgName: string
+  orgName: string,
+  responseUrl: string
 ) {
-  const overview = await getOverviewStats(dateParams);
+  // fire-and-forget: 3초 제한 없이 비동기로 처리 후 response_url로 결과 전송
+  (async () => {
+    try {
+      const overview = await getOverviewStats(dateParams);
 
-  const blocks = [
-    {
-      type: "header" as const,
-      text: {
-        type: "plain_text" as const,
-        text: `📊 ${orgName} PR 통계 (최근 30일)`,
-      },
-    },
-    {
-      type: "section" as const,
-      fields: [
+      const blocks = [
         {
-          type: "mrkdwn" as const,
-          text: `*총 PR 수*\n${formatNumber(overview.totalPRs)}개`,
+          type: "header" as const,
+          text: {
+            type: "plain_text" as const,
+            text: `📊 ${orgName} PR 통계 (최근 30일)`,
+          },
         },
         {
-          type: "mrkdwn" as const,
-          text: `*머지된 PR*\n${formatNumber(overview.mergedPRs)}개`,
+          type: "section" as const,
+          fields: [
+            {
+              type: "mrkdwn" as const,
+              text: `*총 PR 수*\n${formatNumber(overview.totalPRs)}개`,
+            },
+            {
+              type: "mrkdwn" as const,
+              text: `*머지된 PR*\n${formatNumber(overview.mergedPRs)}개`,
+            },
+            {
+              type: "mrkdwn" as const,
+              text: `*평균 머지 시간*\n${overview.avgTimeToMergeMs > 0 ? formatDuration(overview.avgTimeToMergeMs) : "--"}`,
+            },
+            {
+              type: "mrkdwn" as const,
+              text: `*평균 첫 리뷰 시간*\n${overview.avgTimeToFirstReviewMs > 0 ? formatDuration(overview.avgTimeToFirstReviewMs) : "--"}`,
+            },
+            {
+              type: "mrkdwn" as const,
+              text: `*머지율*\n${overview.totalPRs > 0 ? formatPercentage(overview.mergeRate, 0) : "--"}`,
+            },
+            {
+              type: "mrkdwn" as const,
+              text: `*평균 수정 횟수*\n${overview.avgRevisionCount.toFixed(1)}회`,
+            },
+          ],
         },
-        {
-          type: "mrkdwn" as const,
-          text: `*평균 머지 시간*\n${overview.avgTimeToMergeMs > 0 ? formatDuration(overview.avgTimeToMergeMs) : "--"}`,
-        },
-        {
-          type: "mrkdwn" as const,
-          text: `*평균 첫 리뷰 시간*\n${overview.avgTimeToFirstReviewMs > 0 ? formatDuration(overview.avgTimeToFirstReviewMs) : "--"}`,
-        },
-        {
-          type: "mrkdwn" as const,
-          text: `*머지율*\n${overview.totalPRs > 0 ? formatPercentage(overview.mergeRate, 0) : "--"}`,
-        },
-        {
-          type: "mrkdwn" as const,
-          text: `*평균 수정 횟수*\n${overview.avgRevisionCount.toFixed(1)}회`,
-        },
-      ],
-    },
-  ];
+      ];
 
-  return NextResponse.json({ response_type: "in_channel", blocks });
+      await sendDeferredResponse(responseUrl, { response_type: "in_channel", blocks });
+    } catch (error) {
+      console.error("[/pr-stats] error:", error);
+      await sendDeferredResponse(responseUrl, {
+        response_type: "ephemeral",
+        text: "통계 조회 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      });
+    }
+  })();
 }
 
-async function handlePrLeaderboard(dateParams: {
-  installationId: string;
-  from: string;
-  to: string;
-}) {
-  const rankings = await getReviewerRankings({ ...dateParams, limit: 5 });
+function handlePrLeaderboardDeferred(
+  dateParams: { installationId: string; from: string; to: string },
+  responseUrl: string
+) {
+  (async () => {
+    try {
+      const rankings = await getReviewerRankings({ ...dateParams, limit: 5 });
 
-  if (rankings.length === 0) {
-    return NextResponse.json({
-      response_type: "ephemeral",
-      text: "최근 30일간 리뷰 데이터가 없습니다.",
-    });
-  }
+      if (rankings.length === 0) {
+        await sendDeferredResponse(responseUrl, {
+          response_type: "ephemeral",
+          text: "최근 30일간 리뷰 데이터가 없습니다.",
+        });
+        return;
+      }
 
-  const medals = ["🥇", "🥈", "🥉"];
-  const lines = rankings.map((r) => {
-    const medal = r.rank <= 3 ? medals[r.rank - 1] : `${r.rank}.`;
-    const time =
-      r.avgResponseTimeMs > 0 ? formatDuration(r.avgResponseTimeMs) : "N/A";
-    return `${medal} *${r.user.login}* — ${time} · ${r.reviewCount}건 리뷰`;
-  });
+      const medals = ["🥇", "🥈", "🥉"];
+      const lines = rankings.map((r) => {
+        const medal = r.rank <= 3 ? medals[r.rank - 1] : `${r.rank}.`;
+        const time =
+          r.avgResponseTimeMs > 0 ? formatDuration(r.avgResponseTimeMs) : "N/A";
+        return `${medal} *${r.user.login}* — ${time} · ${r.reviewCount}건 리뷰`;
+      });
 
-  return NextResponse.json({
-    response_type: "in_channel",
-    blocks: [
-      {
-        type: "header",
-        text: { type: "plain_text", text: "🏆 리뷰어 리더보드 (최근 30일)" },
-      },
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: lines.join("\n") },
-      },
-    ],
-  });
+      await sendDeferredResponse(responseUrl, {
+        response_type: "in_channel",
+        blocks: [
+          {
+            type: "header",
+            text: { type: "plain_text", text: "🏆 리뷰어 리더보드 (최근 30일)" },
+          },
+          {
+            type: "section",
+            text: { type: "mrkdwn", text: lines.join("\n") },
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("[/pr-leaderboard] error:", error);
+      await sendDeferredResponse(responseUrl, {
+        response_type: "ephemeral",
+        text: "리더보드 조회 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      });
+    }
+  })();
 }
 
 async function handlePrStale(installationId: string) {
   const twentyFourHoursAgo = subDays(new Date(), 1);
 
+  // 24시간 이상 된 open PR 조회 (리뷰 유무와 관계없이)
   const stalePRs = await prisma.pullRequest.findMany({
     where: {
       repository: { installationId },
       state: "open",
-      firstReviewAt: null,
       createdAt: { lte: twentyFourHoursAgo },
     },
     include: {
@@ -189,7 +231,8 @@ async function handlePrStale(installationId: string) {
     const hoursAgo = Math.round(
       (Date.now() - pr.createdAt.getTime()) / 3_600_000
     );
-    return `• <https://github.com/${pr.repository.fullName}/pull/${pr.number}|#${pr.number} ${pr.title}> by ${pr.author.login} (${hoursAgo}시간 대기)`;
+    const reviewStatus = pr.firstReviewAt ? "리뷰됨" : "리뷰 대기";
+    return `• <https://github.com/${pr.repository.fullName}/pull/${pr.number}|#${pr.number} ${pr.title}> by ${pr.author.login} (${hoursAgo}시간, ${reviewStatus})`;
   });
 
   return NextResponse.json({
@@ -199,7 +242,7 @@ async function handlePrStale(installationId: string) {
         type: "header",
         text: {
           type: "plain_text",
-          text: `👀 방치된 PR ${stalePRs.length}개`,
+          text: `👀 미머지 PR ${stalePRs.length}개`,
         },
       },
       {
