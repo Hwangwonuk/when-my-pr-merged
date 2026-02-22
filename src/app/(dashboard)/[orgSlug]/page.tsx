@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { RankBadge } from "@/components/shared/rank-badge";
 import { formatDuration, formatPercentage, formatNumber, formatRelativeTime } from "@/lib/utils/format";
 import { subDays } from "date-fns";
-import { Link2, Rocket, GitPullRequest, AlertCircle } from "lucide-react";
+import { Link2, Rocket, GitPullRequest, AlertCircle, Clock } from "lucide-react";
 
 interface Props {
   params: Promise<{ orgSlug: string }>;
@@ -86,7 +86,7 @@ export default async function OrgDashboardPage({ params }: Props) {
     to: now.toISOString(),
   };
 
-  const [overview, topReviewers, recentMerged, stalePRs] = await Promise.all([
+  const [overview, topReviewers, recentMerged, stalePRs, reviewedOpenPRs] = await Promise.all([
     getOverviewStats(dateParams),
     getReviewerRankings({ ...dateParams, limit: 5 }),
     prisma.pullRequest.findMany({
@@ -113,6 +113,26 @@ export default async function OrgDashboardPage({ params }: Props) {
       include: {
         author: { select: { login: true, avatarUrl: true } },
         repository: { select: { name: true, fullName: true } },
+      },
+      orderBy: { createdAt: "asc" },
+      take: 5,
+    }),
+    // 리뷰 완료 & 미머지: 리뷰는 있지만 아직 open인 PR
+    prisma.pullRequest.findMany({
+      where: {
+        repository: { installationId: installation.id },
+        state: "open",
+        draft: false,
+        firstReviewAt: { not: null },
+      },
+      include: {
+        author: { select: { login: true, avatarUrl: true } },
+        repository: { select: { name: true, fullName: true } },
+        reviews: {
+          orderBy: { submittedAt: "desc" },
+          take: 1,
+          select: { state: true, submittedAt: true },
+        },
       },
       orderBy: { createdAt: "asc" },
       take: 5,
@@ -213,6 +233,62 @@ export default async function OrgDashboardPage({ params }: Props) {
                   </div>
                   <div className="text-[13px] text-amber-400/80 tabular-nums shrink-0 ml-4">
                     {waitingHours}시간 대기
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Reviewed but Unmerged PRs */}
+      {reviewedOpenPRs.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-blue-400" />
+            미머지 PR ({reviewedOpenPRs.length})
+          </h2>
+          <div className="space-y-0">
+            {reviewedOpenPRs.map((pr) => {
+              const lastReview = pr.reviews[0];
+              const sinceReview = lastReview
+                ? formatDuration(now.getTime() - lastReview.submittedAt.getTime())
+                : null;
+              const reviewStateLabels: Record<string, string> = {
+                APPROVED: "승인됨",
+                CHANGES_REQUESTED: "변경 요청",
+                COMMENTED: "코멘트",
+                DISMISSED: "기각됨",
+              };
+              const stateLabel = lastReview
+                ? reviewStateLabels[lastReview.state] ?? "리뷰됨"
+                : "리뷰됨";
+              return (
+                <a
+                  key={pr.id}
+                  href={`https://github.com/${pr.repository.fullName}/pull/${pr.number}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between px-3 py-2.5 -mx-3 rounded-md hover:bg-gray-800/40 transition-all duration-200 group"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <GitPullRequest className="w-4 h-4 text-blue-400 shrink-0" />
+                    {pr.author.avatarUrl && (
+                      <img
+                        src={pr.author.avatarUrl}
+                        alt={pr.author.login}
+                        className="w-5 h-5 rounded-full shrink-0"
+                      />
+                    )}
+                    <span className="text-[13px] text-white truncate group-hover:text-indigo-400 transition-colors">
+                      {pr.title}
+                    </span>
+                    <span className="text-[11px] text-gray-600 shrink-0">
+                      #{pr.number}
+                    </span>
+                  </div>
+                  <div className="text-[13px] text-blue-400/80 tabular-nums shrink-0 ml-4">
+                    {stateLabel}{sinceReview ? ` · ${sinceReview} 전` : ""}
                   </div>
                 </a>
               );

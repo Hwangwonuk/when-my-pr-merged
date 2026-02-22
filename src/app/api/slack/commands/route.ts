@@ -211,52 +211,105 @@ async function handlePrLeaderboardDeferred(
 }
 
 async function handlePrStale(installationId: string) {
-  const twentyFourHoursAgo = subDays(new Date(), 1);
+  // Open PR을 두 그룹으로 분리: 리뷰 대기 vs 리뷰 완료 & 미머지
+  const [waitingForReview, reviewedButOpen] = await Promise.all([
+    // 리뷰 대기: 리뷰가 아직 없는 open PR
+    prisma.pullRequest.findMany({
+      where: {
+        repository: { installationId },
+        state: "open",
+        draft: false,
+        firstReviewAt: null,
+      },
+      include: {
+        author: { select: { login: true } },
+        repository: { select: { fullName: true } },
+      },
+      orderBy: { createdAt: "asc" },
+      take: 10,
+    }),
+    // 리뷰 완료 & 미머지: 리뷰는 있지만 아직 open인 PR
+    prisma.pullRequest.findMany({
+      where: {
+        repository: { installationId },
+        state: "open",
+        draft: false,
+        firstReviewAt: { not: null },
+      },
+      include: {
+        author: { select: { login: true } },
+        repository: { select: { fullName: true } },
+        reviews: {
+          orderBy: { submittedAt: "desc" },
+          take: 1,
+          select: { state: true },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+      take: 10,
+    }),
+  ]);
 
-  // 24시간 이상 된 open PR 조회 (리뷰 유무와 관계없이)
-  const stalePRs = await prisma.pullRequest.findMany({
-    where: {
-      repository: { installationId },
-      state: "open",
-      createdAt: { lte: twentyFourHoursAgo },
-    },
-    include: {
-      author: { select: { login: true } },
-      repository: { select: { fullName: true } },
-    },
-    orderBy: { createdAt: "asc" },
-    take: 10,
-  });
-
-  if (stalePRs.length === 0) {
+  if (waitingForReview.length === 0 && reviewedButOpen.length === 0) {
     return NextResponse.json({
       response_type: "ephemeral",
-      text: "🎉 방치된 PR이 없습니다! 모든 PR이 리뷰되고 있습니다.",
+      text: "🎉 열려있는 PR이 없습니다!",
     });
   }
 
-  const lines = stalePRs.map((pr) => {
-    const hoursAgo = Math.round(
-      (Date.now() - pr.createdAt.getTime()) / 3_600_000
+  const blocks: Record<string, unknown>[] = [
+    {
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: `👀 열린 PR 현황`,
+      },
+    },
+  ];
+
+  if (waitingForReview.length > 0) {
+    const lines = waitingForReview.map((pr) => {
+      const elapsed = formatDuration(Date.now() - pr.createdAt.getTime());
+      return `• <https://github.com/${pr.repository.fullName}/pull/${pr.number}|#${pr.number} ${pr.title}> by ${pr.author.login} (${elapsed}, 리뷰 대기)`;
+    });
+    blocks.push(
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*📋 리뷰 대기 (${waitingForReview.length}개)*\n${lines.join("\n")}`,
+        },
+      },
     );
-    const reviewStatus = pr.firstReviewAt ? "리뷰됨" : "리뷰 대기";
-    return `• <https://github.com/${pr.repository.fullName}/pull/${pr.number}|#${pr.number} ${pr.title}> by ${pr.author.login} (${hoursAgo}시간, ${reviewStatus})`;
-  });
+  }
+
+  if (reviewedButOpen.length > 0) {
+    const reviewStateLabels: Record<string, string> = {
+      APPROVED: "승인됨",
+      CHANGES_REQUESTED: "변경 요청",
+      COMMENTED: "코멘트",
+      DISMISSED: "기각됨",
+    };
+
+    const lines = reviewedButOpen.map((pr) => {
+      const elapsed = formatDuration(Date.now() - pr.createdAt.getTime());
+      const latestState = pr.reviews[0]?.state ?? "COMMENTED";
+      const stateLabel = reviewStateLabels[latestState] ?? "리뷰됨";
+      return `• <https://github.com/${pr.repository.fullName}/pull/${pr.number}|#${pr.number} ${pr.title}> by ${pr.author.login} (${elapsed}, ${stateLabel})`;
+    });
+    blocks.push(
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*✅ 리뷰 완료 & 미머지 (${reviewedButOpen.length}개)*\n${lines.join("\n")}`,
+        },
+      },
+    );
+  }
 
   return NextResponse.json({
     response_type: "in_channel",
-    blocks: [
-      {
-        type: "header",
-        text: {
-          type: "plain_text",
-          text: `👀 미머지 PR ${stalePRs.length}개`,
-        },
-      },
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: lines.join("\n") },
-      },
-    ],
+    blocks,
   });
 }

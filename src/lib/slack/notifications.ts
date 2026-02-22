@@ -53,6 +53,21 @@ export async function sendStalePrAlert(
   });
 }
 
+export async function sendApprovedButUnmergedAlert(
+  config: SlackConfig,
+  pr: { title: string; number: number; url: string; hours: number; author: string }
+) {
+  if (!config.channelId) return;
+
+  const client = getSlackClient(config.botToken);
+  const message = slackMessages.approvedButUnmerged(pr);
+
+  await client.chat.postMessage({
+    channel: config.channelId,
+    ...message,
+  });
+}
+
 export async function sendMergePrediction(
   config: SlackConfig,
   pr: { title: string; number: number; predictedTime: string; confidenceLevel?: "high" | "medium" | "low" }

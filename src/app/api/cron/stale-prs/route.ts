@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendStalePrAlert } from "@/lib/slack/notifications";
+import { sendStalePrAlert, sendApprovedButUnmergedAlert } from "@/lib/slack/notifications";
 
 export async function GET(req: NextRequest) {
   // Verify cron secret
@@ -46,6 +46,37 @@ export async function GET(req: NextRequest) {
         number: pr.number,
         url: `https://github.com/${pr.repository.fullName}/pull/${pr.number}`,
         hours: hoursStale,
+        author: pr.author.login,
+      });
+      alertsSent++;
+    }
+
+    // 승인되었지만 48시간 이상 미머지된 PR 알림
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+
+    const approvedButUnmerged = await prisma.pullRequest.findMany({
+      where: {
+        repository: { installationId: integration.installationId },
+        state: "open",
+        draft: false,
+        firstApprovalAt: { not: null, lte: fortyEightHoursAgo },
+      },
+      include: {
+        author: { select: { login: true } },
+        repository: { select: { fullName: true } },
+      },
+    });
+
+    for (const pr of approvedButUnmerged) {
+      const hoursSinceApproval = Math.floor(
+        (Date.now() - pr.firstApprovalAt!.getTime()) / (60 * 60 * 1000)
+      );
+
+      await sendApprovedButUnmergedAlert(integration, {
+        title: pr.title,
+        number: pr.number,
+        url: `https://github.com/${pr.repository.fullName}/pull/${pr.number}`,
+        hours: hoursSinceApproval,
         author: pr.author.login,
       });
       alertsSent++;

@@ -138,6 +138,28 @@ export const slackMessages = {
     ],
   }),
 
+  approvedButUnmerged: (params: { title: string; number: number; url: string; hours: number; author: string }) => ({
+    blocks: [
+      {
+        type: "section" as const,
+        text: {
+          type: "mrkdwn" as const,
+          text: `:white_check_mark: *승인된 PR 미머지!* PR #${params.number}이 승인 후 ${params.hours}시간째 머지되지 않았습니다.\n<${params.url}|${params.title}> by ${params.author}`,
+        },
+      },
+      {
+        type: "actions" as const,
+        elements: [
+          {
+            type: "button" as const,
+            text: { type: "plain_text" as const, text: "머지하러 가기 :rocket:" },
+            url: params.url,
+          },
+        ],
+      },
+    ],
+  }),
+
   testMessage: (channelName: string) => ({
     blocks: [
       {
