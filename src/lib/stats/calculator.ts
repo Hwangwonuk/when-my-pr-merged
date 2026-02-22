@@ -22,10 +22,11 @@ export async function getOverviewStats(params: DateRangeParams): Promise<Overvie
     },
   };
 
-  const [totalPRs, mergedPRs, openPRs] = await Promise.all([
+  const [totalPRs, mergedPRs, openPRs, closedPRs] = await Promise.all([
     prisma.pullRequest.count({ where }),
     prisma.pullRequest.count({ where: { ...where, state: "merged" } }),
     prisma.pullRequest.count({ where: { ...where, state: "open" } }),
+    prisma.pullRequest.count({ where: { ...where, state: "closed" } }),
   ]);
 
   const mergedPRsWithMetrics = await prisma.pullRequest.findMany({
@@ -107,6 +108,7 @@ export async function getOverviewStats(params: DateRangeParams): Promise<Overvie
     totalPRs,
     mergedPRs,
     openPRs,
+    closedPRs,
     avgTimeToFirstReviewMs,
     avgTimeToMergeMs,
     medianTimeToMergeMs: median(mergeTimes),

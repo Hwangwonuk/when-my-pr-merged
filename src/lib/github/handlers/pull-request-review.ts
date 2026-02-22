@@ -70,9 +70,13 @@ export async function handlePullRequestReviewEvent(payload: PullRequestReviewPay
     orderBy: { requestedAt: "desc" },
   });
 
-  const responseTimeMs = reviewRequest
-    ? BigInt(submittedAt.getTime() - reviewRequest.requestedAt.getTime())
-    : null;
+  let responseTimeMs: bigint;
+  if (reviewRequest) {
+    responseTimeMs = BigInt(submittedAt.getTime() - reviewRequest.requestedAt.getTime());
+  } else {
+    // Fallback: use PR creation time as the request time
+    responseTimeMs = BigInt(submittedAt.getTime() - existingPr.createdAt.getTime());
+  }
 
   // Create review record
   await prisma.review.upsert({
@@ -92,11 +96,20 @@ export async function handlePullRequestReviewEvent(payload: PullRequestReviewPay
     },
   });
 
-  // Fulfill review request
+  // Fulfill review request or create one retroactively
   if (reviewRequest) {
     await prisma.reviewRequest.update({
       where: { id: reviewRequest.id },
       data: { fulfilledAt: submittedAt },
+    });
+  } else {
+    await prisma.reviewRequest.create({
+      data: {
+        pullRequestId: existingPr.id,
+        reviewerId: reviewer.id,
+        requestedAt: existingPr.createdAt,
+        fulfilledAt: submittedAt,
+      },
     });
   }
 
@@ -129,7 +142,7 @@ export async function handlePullRequestReviewEvent(payload: PullRequestReviewPay
   });
 
   // Send fast review praise if applicable
-  if (responseTimeMs !== null && responseTimeMs <= BigInt(FAST_REVIEW_THRESHOLD_MS)) {
+  if (responseTimeMs <= BigInt(FAST_REVIEW_THRESHOLD_MS)) {
     const repo = await prisma.repository.findUnique({
       where: { githubId: payload.repository.id },
       include: { installation: { include: { slackIntegration: true } } },

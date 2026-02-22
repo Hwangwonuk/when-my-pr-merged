@@ -98,7 +98,7 @@ create_test_branch() {
 
   mkdir -p "$(dirname "$file_path")"
   echo "$content" > "$file_path"
-  git add "$file_path"
+  git add -f "$file_path"
   git commit -m "$commit_msg" --no-verify 2>/dev/null
   git push origin "$branch_name" 2>/dev/null
 
@@ -400,7 +400,7 @@ scenario_5() {
     git checkout -b "$branch" 2>/dev/null
     mkdir -p "$(dirname "$file")"
     {
-      echo "# E2E Test - Scenario 5 - Size ${size^^}"
+      echo "# E2E Test - Scenario 5 - Size $(echo "$size" | tr '[:lower:]' '[:upper:]')"
       echo "# Timestamp: ${TIMESTAMP}"
       echo "# Line count target: ${line_count}"
       echo ""
@@ -409,7 +409,7 @@ scenario_5() {
       done
     } > "$file"
 
-    git add "$file"
+    git add -f "$file"
     git commit -m "test: ${size} PR (${line_count} lines) for size analysis" --no-verify 2>/dev/null
     git push origin "$branch" 2>/dev/null
     CREATED_BRANCHES+=("$branch")

@@ -4,6 +4,7 @@ export interface OverviewStats {
   totalPRs: number;
   mergedPRs: number;
   openPRs: number;
+  closedPRs: number;
   avgTimeToFirstReviewMs: number;
   avgTimeToMergeMs: number;
   medianTimeToMergeMs: number;

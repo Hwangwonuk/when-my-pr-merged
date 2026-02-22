@@ -147,7 +147,11 @@ export default async function OrgDashboardPage({ params }: Props) {
         <StatsCard
           title="총 PR 수"
           value={formatNumber(overview.totalPRs)}
-          subtitle={`머지: ${overview.mergedPRs} / 오픈: ${overview.openPRs}`}
+          subtitle={
+            overview.closedPRs > 0
+              ? `머지: ${overview.mergedPRs} / 오픈: ${overview.openPRs} / 클로즈: ${overview.closedPRs}`
+              : `머지: ${overview.mergedPRs} / 오픈: ${overview.openPRs}`
+          }
         />
         <StatsCard
           title="평균 머지 시간"
@@ -157,8 +161,9 @@ export default async function OrgDashboardPage({ params }: Props) {
         />
         <StatsCard
           title="평균 첫 리뷰 시간"
-          value={formatDuration(overview.avgTimeToFirstReviewMs)}
-          trend={overview.trend.timeToFirstReview}
+          value={overview.avgTimeToFirstReviewMs > 0 ? formatDuration(overview.avgTimeToFirstReviewMs) : "--"}
+          subtitle={overview.avgTimeToFirstReviewMs > 0 ? undefined : "리뷰 데이터 없음"}
+          trend={overview.avgTimeToFirstReviewMs > 0 ? overview.trend.timeToFirstReview : undefined}
         />
         <StatsCard
           title="머지율"

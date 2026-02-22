@@ -5,6 +5,7 @@ import { BarChart3 } from "lucide-react";
 import { HourlyHeatmap } from "@/components/charts/hourly-heatmap";
 import { MergeTimeByDayChart } from "@/components/charts/merge-time-chart";
 import { PrSizeChart } from "@/components/charts/pr-size-chart";
+import { formatHourRangeKo } from "@/lib/utils/format";
 import { subDays } from "date-fns";
 
 interface Props {
@@ -110,7 +111,7 @@ export default async function StatsPage({ params, searchParams }: Props) {
             <div>
               <p className="text-xs text-gray-500 mb-1">가장 빠른 머지 시간대</p>
               <p className="text-2xl font-semibold tabular-nums tracking-tight text-green-400">
-                오전 {bestHour.hour}시 - {bestHour.hour + 1}시
+                {formatHourRangeKo(bestHour.hour)}
               </p>
               <p className="text-xs text-gray-600 mt-0.5">
                 이 시간대에 올린 PR이 가장 빨리 머지됩니다

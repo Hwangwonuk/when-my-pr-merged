@@ -4,6 +4,7 @@ import {
   formatNumber,
   formatPercentage,
   formatRelativeTime,
+  formatHourRangeKo,
   getDayNameKo,
   getPrSizeBucket,
   getHourKST,
@@ -114,6 +115,32 @@ describe("getDayOfWeekKST", () => {
     // Saturday 2025-01-18 23:00 UTC = Sunday 2025-01-19 08:00 KST
     const date = new Date("2025-01-18T23:00:00Z");
     expect(getDayOfWeekKST(date)).toBe(0); // Sunday in KST
+  });
+});
+
+describe("formatHourRangeKo", () => {
+  it("formats midnight (0시)", () => {
+    expect(formatHourRangeKo(0)).toBe("오전 12시 - 1시");
+  });
+
+  it("formats morning hours", () => {
+    expect(formatHourRangeKo(9)).toBe("오전 9시 - 10시");
+  });
+
+  it("formats 11시 (last AM hour)", () => {
+    expect(formatHourRangeKo(11)).toBe("오전 11시 - 12시");
+  });
+
+  it("formats noon (12시)", () => {
+    expect(formatHourRangeKo(12)).toBe("오후 12시 - 1시");
+  });
+
+  it("formats afternoon hours (14시 → 오후 2시)", () => {
+    expect(formatHourRangeKo(14)).toBe("오후 2시 - 3시");
+  });
+
+  it("formats 23시 (last hour)", () => {
+    expect(formatHourRangeKo(23)).toBe("오후 11시 - 12시");
   });
 });
 

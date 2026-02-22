@@ -70,6 +70,13 @@ export function getDayOfWeekKST(date: Date): number {
   return dayMap[dayStr] ?? 0;
 }
 
+export function formatHourRangeKo(hour: number): string {
+  const period = hour < 12 ? "오전" : "오후";
+  const displayHour = hour === 0 ? 12 : hour <= 12 ? hour : hour - 12;
+  const nextHour = hour === 23 ? 12 : (hour + 1) <= 12 ? (hour + 1) : (hour + 1) - 12;
+  return `${period} ${displayHour}시 - ${nextHour}시`;
+}
+
 export function getPrSizeBucket(additions: number, deletions: number): "S" | "M" | "L" | "XL" {
   const total = additions + deletions;
   if (total <= 100) return "S";

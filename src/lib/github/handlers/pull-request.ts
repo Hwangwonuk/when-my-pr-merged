@@ -42,6 +42,11 @@ interface PullRequestPayload {
       };
     };
   };
+  requested_reviewer?: {
+    id: number;
+    login: string;
+    avatar_url: string;
+  };
   repository: {
     id: number;
     name: string;
@@ -184,13 +189,28 @@ export async function handlePullRequestEvent(payload: PullRequestPayload) {
     }
 
     case "review_requested": {
-      for (const reviewer of pr.requested_reviewers) {
-        const reviewerUser = await ensureUser(reviewer);
+      const reviewer = payload.requested_reviewer;
+      if (!reviewer) break;
+
+      const existingPr = await prisma.pullRequest.findUnique({
+        where: { githubId: pr.id },
+      });
+      if (!existingPr) break;
+
+      const reviewerUser = await ensureUser(reviewer);
+
+      // Avoid duplicate unfulfilled ReviewRequest for same reviewer
+      const existing = await prisma.reviewRequest.findFirst({
+        where: {
+          pullRequestId: existingPr.id,
+          reviewerId: reviewerUser.id,
+          fulfilledAt: null,
+        },
+      });
+      if (!existing) {
         await prisma.reviewRequest.create({
           data: {
-            pullRequestId: (
-              await prisma.pullRequest.findUnique({ where: { githubId: pr.id } })
-            )!.id,
+            pullRequestId: existingPr.id,
             reviewerId: reviewerUser.id,
             requestedAt: new Date(),
           },
