@@ -53,12 +53,21 @@ export async function POST(req: NextRequest) {
     include: { installation: true },
   });
 
+  console.log("[slack-commands] teamId:", teamId, "slack:", slack?.id, "installationId:", slack?.installation.id, "accountLogin:", slack?.installation.accountLogin);
+
   if (!slack) {
     return NextResponse.json({
       response_type: "ephemeral",
       text: "이 워크스페이스에 연결된 GitHub 조직이 없습니다. 먼저 앱을 설정해주세요.",
     });
   }
+
+  // 해당 installation에 연결된 데이터 확인
+  const [repoCount, prCount] = await Promise.all([
+    prisma.repository.count({ where: { installationId: slack.installation.id } }),
+    prisma.pullRequest.count({ where: { repository: { installationId: slack.installation.id } } }),
+  ]);
+  console.log("[slack-commands] installationId:", slack.installation.id, "repos:", repoCount, "prs:", prCount);
 
   const now = new Date();
   const thirtyDaysAgo = subDays(now, 30);
