@@ -138,6 +138,28 @@ export const slackMessages = {
     ],
   }),
 
+  reviewedButStale: (params: { title: string; number: number; url: string; hours: number; author: string; reviewState: string }) => ({
+    blocks: [
+      {
+        type: "section" as const,
+        text: {
+          type: "mrkdwn" as const,
+          text: `:warning: *리뷰 후 방치 중!* PR #${params.number}이 ${params.reviewState} 상태로 ${params.hours}시간째 업데이트가 없습니다.\n<${params.url}|${params.title}> by ${params.author}`,
+        },
+      },
+      {
+        type: "actions" as const,
+        elements: [
+          {
+            type: "button" as const,
+            text: { type: "plain_text" as const, text: "확인하러 가기 :eyes:" },
+            url: params.url,
+          },
+        ],
+      },
+    ],
+  }),
+
   approvedButUnmerged: (params: { title: string; number: number; url: string; hours: number; author: string }) => ({
     blocks: [
       {

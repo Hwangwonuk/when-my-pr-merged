@@ -267,10 +267,14 @@ async function handlePrStale(installationId: string) {
     },
   ];
 
+  const twentyFourHoursMs = 24 * 60 * 60 * 1000;
+
   if (waitingForReview.length > 0) {
     const lines = waitingForReview.map((pr) => {
-      const elapsed = formatDuration(Date.now() - pr.createdAt.getTime());
-      return `• <https://github.com/${pr.repository.fullName}/pull/${pr.number}|#${pr.number} ${pr.title}> by ${pr.author.login} (${elapsed}, 리뷰 대기)`;
+      const elapsedMs = Date.now() - pr.createdAt.getTime();
+      const elapsed = formatDuration(elapsedMs);
+      const staleMarker = elapsedMs >= twentyFourHoursMs ? " :warning:" : "";
+      return `• <https://github.com/${pr.repository.fullName}/pull/${pr.number}|#${pr.number} ${pr.title}> by ${pr.author.login} (${elapsed}, 리뷰 대기)${staleMarker}`;
     });
     blocks.push(
       {
@@ -292,10 +296,12 @@ async function handlePrStale(installationId: string) {
     };
 
     const lines = reviewedButOpen.map((pr) => {
-      const elapsed = formatDuration(Date.now() - pr.createdAt.getTime());
+      const elapsedMs = Date.now() - pr.createdAt.getTime();
+      const elapsed = formatDuration(elapsedMs);
       const latestState = pr.reviews[0]?.state ?? "COMMENTED";
       const stateLabel = reviewStateLabels[latestState] ?? "리뷰됨";
-      return `• <https://github.com/${pr.repository.fullName}/pull/${pr.number}|#${pr.number} ${pr.title}> by ${pr.author.login} (${elapsed}, ${stateLabel})`;
+      const staleMarker = elapsedMs >= twentyFourHoursMs ? " :warning:" : "";
+      return `• <https://github.com/${pr.repository.fullName}/pull/${pr.number}|#${pr.number} ${pr.title}> by ${pr.author.login} (${elapsed}, ${stateLabel})${staleMarker}`;
     });
     blocks.push(
       {
