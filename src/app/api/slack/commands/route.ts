@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getOverviewStats } from "@/lib/stats/calculator";
@@ -68,17 +68,21 @@ export async function POST(req: NextRequest) {
     to: now.toISOString(),
   };
 
-  // /pr-stale은 가벼운 쿼리라 즉시 응답, 나머지는 deferred response 사용
+  // /pr-stale은 가벼운 쿼리라 즉시 응답, 나머지는 after()로 deferred response
   switch (command) {
     case "/pr-stats":
-      handlePrStatsDeferred(dateParams, slack.installation.accountLogin, responseUrl);
+      after(async () => {
+        await handlePrStatsDeferred(dateParams, slack.installation.accountLogin, responseUrl);
+      });
       return NextResponse.json({
         response_type: "ephemeral",
         text: ":hourglass_flowing_sand: PR 통계를 조회 중입니다...",
       });
 
     case "/pr-leaderboard":
-      handlePrLeaderboardDeferred(dateParams, responseUrl);
+      after(async () => {
+        await handlePrLeaderboardDeferred(dateParams, responseUrl);
+      });
       return NextResponse.json({
         response_type: "ephemeral",
         text: ":hourglass_flowing_sand: 리더보드를 조회 중입니다...",
@@ -95,111 +99,106 @@ export async function POST(req: NextRequest) {
   }
 }
 
-function handlePrStatsDeferred(
+async function handlePrStatsDeferred(
   dateParams: { installationId: string; from: string; to: string },
   orgName: string,
   responseUrl: string
 ) {
-  // fire-and-forget: 3초 제한 없이 비동기로 처리 후 response_url로 결과 전송
-  (async () => {
-    try {
-      const overview = await getOverviewStats(dateParams);
+  try {
+    const overview = await getOverviewStats(dateParams);
 
-      const blocks = [
-        {
-          type: "header" as const,
-          text: {
-            type: "plain_text" as const,
-            text: `📊 ${orgName} PR 통계 (최근 30일)`,
+    const blocks = [
+      {
+        type: "header" as const,
+        text: {
+          type: "plain_text" as const,
+          text: `📊 ${orgName} PR 통계 (최근 30일)`,
+        },
+      },
+      {
+        type: "section" as const,
+        fields: [
+          {
+            type: "mrkdwn" as const,
+            text: `*총 PR 수*\n${formatNumber(overview.totalPRs)}개`,
           },
-        },
-        {
-          type: "section" as const,
-          fields: [
-            {
-              type: "mrkdwn" as const,
-              text: `*총 PR 수*\n${formatNumber(overview.totalPRs)}개`,
-            },
-            {
-              type: "mrkdwn" as const,
-              text: `*머지된 PR*\n${formatNumber(overview.mergedPRs)}개`,
-            },
-            {
-              type: "mrkdwn" as const,
-              text: `*평균 머지 시간*\n${overview.avgTimeToMergeMs > 0 ? formatDuration(overview.avgTimeToMergeMs) : "--"}`,
-            },
-            {
-              type: "mrkdwn" as const,
-              text: `*평균 첫 리뷰 시간*\n${overview.avgTimeToFirstReviewMs > 0 ? formatDuration(overview.avgTimeToFirstReviewMs) : "--"}`,
-            },
-            {
-              type: "mrkdwn" as const,
-              text: `*머지율*\n${overview.totalPRs > 0 ? formatPercentage(overview.mergeRate, 0) : "--"}`,
-            },
-            {
-              type: "mrkdwn" as const,
-              text: `*평균 수정 횟수*\n${overview.avgRevisionCount.toFixed(1)}회`,
-            },
-          ],
-        },
-      ];
+          {
+            type: "mrkdwn" as const,
+            text: `*머지된 PR*\n${formatNumber(overview.mergedPRs)}개`,
+          },
+          {
+            type: "mrkdwn" as const,
+            text: `*평균 머지 시간*\n${overview.avgTimeToMergeMs > 0 ? formatDuration(overview.avgTimeToMergeMs) : "--"}`,
+          },
+          {
+            type: "mrkdwn" as const,
+            text: `*평균 첫 리뷰 시간*\n${overview.avgTimeToFirstReviewMs > 0 ? formatDuration(overview.avgTimeToFirstReviewMs) : "--"}`,
+          },
+          {
+            type: "mrkdwn" as const,
+            text: `*머지율*\n${overview.totalPRs > 0 ? formatPercentage(overview.mergeRate, 0) : "--"}`,
+          },
+          {
+            type: "mrkdwn" as const,
+            text: `*평균 수정 횟수*\n${overview.avgRevisionCount.toFixed(1)}회`,
+          },
+        ],
+      },
+    ];
 
-      await sendDeferredResponse(responseUrl, { response_type: "in_channel", blocks });
-    } catch (error) {
-      console.error("[/pr-stats] error:", error);
-      await sendDeferredResponse(responseUrl, {
-        response_type: "ephemeral",
-        text: "통계 조회 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-      });
-    }
-  })();
+    await sendDeferredResponse(responseUrl, { response_type: "in_channel", blocks });
+  } catch (error) {
+    console.error("[/pr-stats] error:", error);
+    await sendDeferredResponse(responseUrl, {
+      response_type: "ephemeral",
+      text: "통계 조회 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    });
+  }
 }
 
-function handlePrLeaderboardDeferred(
+async function handlePrLeaderboardDeferred(
   dateParams: { installationId: string; from: string; to: string },
   responseUrl: string
 ) {
-  (async () => {
-    try {
-      const rankings = await getReviewerRankings({ ...dateParams, limit: 5 });
+  try {
+    const rankings = await getReviewerRankings({ ...dateParams, limit: 5 });
 
-      if (rankings.length === 0) {
-        await sendDeferredResponse(responseUrl, {
-          response_type: "ephemeral",
-          text: "최근 30일간 리뷰 데이터가 없습니다.",
-        });
-        return;
-      }
-
-      const medals = ["🥇", "🥈", "🥉"];
-      const lines = rankings.map((r) => {
-        const medal = r.rank <= 3 ? medals[r.rank - 1] : `${r.rank}.`;
-        const time =
-          r.avgResponseTimeMs > 0 ? formatDuration(r.avgResponseTimeMs) : "N/A";
-        return `${medal} *${r.user.login}* — ${time} · ${r.reviewCount}건 리뷰`;
-      });
-
-      await sendDeferredResponse(responseUrl, {
-        response_type: "in_channel",
-        blocks: [
-          {
-            type: "header",
-            text: { type: "plain_text", text: "🏆 리뷰어 리더보드 (최근 30일)" },
-          },
-          {
-            type: "section",
-            text: { type: "mrkdwn", text: lines.join("\n") },
-          },
-        ],
-      });
-    } catch (error) {
-      console.error("[/pr-leaderboard] error:", error);
+    if (rankings.length === 0) {
       await sendDeferredResponse(responseUrl, {
         response_type: "ephemeral",
-        text: "리더보드 조회 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        text: "최근 30일간 리뷰 데이터가 없습니다.",
       });
+      return;
     }
-  })();
+
+    const medals = ["🥇", "🥈", "🥉"];
+    const lines = rankings.map((r) => {
+      const medal = r.rank <= 3 ? medals[r.rank - 1] : `${r.rank}.`;
+      const time =
+        r.avgResponseTimeMs > 0 ? formatDuration(r.avgResponseTimeMs) : "N/A";
+      return `${medal} *${r.user.login}* — ${time} · ${r.reviewCount}건 리뷰`;
+    });
+
+    await sendDeferredResponse(responseUrl, {
+      response_type: "in_channel",
+      blocks: [
+        {
+          type: "header",
+          text: { type: "plain_text", text: "🏆 리뷰어 리더보드 (최근 30일)" },
+        },
+        {
+          type: "section",
+          text: { type: "mrkdwn", text: lines.join("\n") },
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("[/pr-leaderboard] error:", error);
+    await sendDeferredResponse(responseUrl, {
+      response_type: "ephemeral",
+      text: "리더보드 조회 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    });
+  }
 }
 
 async function handlePrStale(installationId: string) {
